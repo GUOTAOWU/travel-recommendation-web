@@ -6,25 +6,25 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 查询物品DTO
+ * アイテム検索DTO
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Schema(description = "查询物品DTO")
+@Schema(description = "アイテム検索DTO")
 public class ItemQueryDTO extends PageDTO {
 
-    @Schema(description = "物品标题")
+    @Schema(description = "アイテムのタイトル")
     private String title;
 
-    @Schema(description = "物品描述")
+    @Schema(description = "アイテムの説明")
     private String description;
 
-    @Schema(description = "类别ID")
+    @Schema(description = "カテゴリID")
     private Long categoryId;
 
-    @Schema(description = "标签")
+    @Schema(description = "タグ")
     private String tag;
     
-    @Schema(description = "发布者真实姓名")
+    @Schema(description = "投稿者の氏名")
     private String userRealName;
-} 
+}

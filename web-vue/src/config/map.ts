@@ -1,23 +1,23 @@
-// 高德地图配置
+// 高徳地図（AMap）の設定
 export const mapConfig = {
-  // 高德地图Web端API Key
-  // 请在高德开放平台申请：https://console.amap.com/dev/key/app
+  // 高徳地図 Web端 APIキー
+  // 高徳オープンプラットフォームで申請してください：https://console.amap.com/dev/key/app
   key: '3d4c3bf2ed77b37809aefa1e9b3b64ec',
   
-  // 地图版本
+  // 地図バージョン
   version: '2.0',
   
-  // 地图插件
+  // 地図プラグイン
   plugins: [
-    'AMap.Geocoder',    // 地理编码插件
-    'AMap.InfoWindow',  // 信息窗口插件
-    'AMap.ToolBar',     // 工具栏插件
-    'AMap.Scale'        // 比例尺插件
+    'AMap.Geocoder',    // ジオコーディング（住所検索）プラグイン
+    'AMap.InfoWindow',  // 情報ウィンドウプラグイン
+    'AMap.ToolBar',     // ツールバープラグイン
+    'AMap.Scale'        // スケール（比例尺）プラグイン
   ],
   
-  // 默认缩放级别
+  // デフォルトのズームレベル
   defaultZoom: 10,
   
-  // 地图样式
+  // 地図のスタイル
   mapStyle: 'amap://styles/normal'
 }

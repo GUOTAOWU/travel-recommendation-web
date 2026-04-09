@@ -1,5 +1,5 @@
 """
-Neo4j图数据库客户端
+Neo4j グラフデータベースクライアント
 """
 from neo4j import GraphDatabase
 import logging
@@ -9,62 +9,39 @@ from algo.knowledge_graph.config import NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD
 logger = logging.getLogger(__name__)
 
 class Neo4jClient:
-    """Neo4j数据库客户端"""
+    """Neo4j グラフデータベースクライアント"""
     
     def __init__(self, uri: str = NEO4J_URI, user: str = NEO4J_USER, password: str = NEO4J_PASSWORD):
         """
-        初始化Neo4j客户端
-        
-        Args:
-            uri: Neo4j数据库连接地址
-            user: 用户名
-            password: 密码
+        Neo4j クライアントを初期化する
         """
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         
     def close(self):
-        """关闭数据库连接"""
+        """データベース接続をクローズする"""
         if self.driver:
             self.driver.close()
             
     def execute_query(self, query: str, parameters: Optional[Dict] = None) -> List[Dict]:
-        """
-        执行Cypher查询
-        
-        Args:
-            query: Cypher查询语句
-            parameters: 查询参数
-            
-        Returns:
-            查询结果列表
-        """
+        """Cypher クエリを実行する"""
         with self.driver.session() as session:
             result = session.run(query, parameters or {})
             return [record.data() for record in result]
     
     def execute_query_raw(self, query: str, parameters: Optional[Dict] = None) -> List:
-        """
-        执行Cypher查询并返回原始记录
-        
-        Args:
-            query: Cypher查询语句
-            parameters: 查询参数
-            
-        Returns:
-            原始记录列表
-        """
+        """Cypher クエリを実行し、生のレコードを返す"""
         with self.driver.session() as session:
             result = session.run(query, parameters or {})
             return list(result)
     
     def clear_database(self):
-        """清空数据库"""
+        """データベースをクリアする"""
         query = "MATCH (n) DETACH DELETE n"
         self.execute_query(query)
-        logger.info("数据库已清空")
+        logger.info("データベースがクリアされました")
     
     def create_constraints(self):
-        """创建约束和索引"""
+        """制約とインデックスを作成する"""
         constraints = [
             "CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE",
             "CREATE CONSTRAINT category_id IF NOT EXISTS FOR (c:Category) REQUIRE c.id IS UNIQUE", 
@@ -80,13 +57,12 @@ class Neo4jClient:
             try:
                 self.execute_query(constraint)
             except Exception as e:
-                # 约束可能已存在，忽略错误
-                logger.debug(f"约束创建失败（可能已存在）: {e}")
+                logger.debug(f"制約の作成に失敗しました（既に存在している可能性があります）: {e}")
         
-        logger.info("约束和索引创建完成")
+        logger.info("制約とインデックスの作成が完了しました")
     
     def create_user_nodes(self, users: List[Dict]):
-        """创建用户节点"""
+        """ユーザーノードを作成する"""
         query = """
         UNWIND $users AS user
         MERGE (u:User {id: user.id})
@@ -102,10 +78,10 @@ class Neo4jClient:
             u.updateTime = user.updateTime
         """
         self.execute_query(query, {"users": users})
-        logger.info(f"创建了 {len(users)} 个用户节点")
+        logger.info(f"{len(users)} 個のユーザーノードの作成に成功しました")
     
     def create_category_nodes(self, categories: List[Dict]):
-        """创建类别节点"""
+        """カテゴリノードを作成する"""
         query = """
         UNWIND $categories AS category
         MERGE (c:Category {id: category.id})
@@ -115,10 +91,10 @@ class Neo4jClient:
             c.updateTime = category.updateTime
         """
         self.execute_query(query, {"categories": categories})
-        logger.info(f"创建了 {len(categories)} 个类别节点")
+        logger.info(f"{len(categories)} 個のカテゴリノードの作成に成功しました")
     
     def create_item_nodes(self, items: List[Dict]):
-        """创建物品节点"""
+        """スポット（アイテム）ノードを作成する"""
         query = """
         UNWIND $items AS item
         MERGE (i:Item {id: item.id})
@@ -131,10 +107,10 @@ class Neo4jClient:
             i.updateTime = item.updateTime
         """
         self.execute_query(query, {"items": items})
-        logger.info(f"创建了 {len(items)} 个物品节点")
+        logger.info(f"{len(items)} 個のスポットノードの作成に成功しました")
     
     def create_tag_nodes(self, tags: List[Dict]):
-        """创建标签节点"""
+        """タグノードを作成する"""
         query = """
         UNWIND $tags AS tag
         MERGE (t:Tag {id: tag.id})
@@ -144,11 +120,10 @@ class Neo4jClient:
             t.updateTime = datetime()
         """
         self.execute_query(query, {"tags": tags})
-        logger.info(f"创建了 {len(tags)} 个标签节点")
+        logger.info(f"{len(tags)} 個のタグノードの作成に成功しました")
     
     def create_relationships(self, relationships: List[Dict]):
-        """创建关系"""
-        # 用户创建物品关系
+        """リレーションシップ（関連）を作成する"""
         user_create_item_query = """
         UNWIND $relationships AS rel
         MATCH (u:User {id: rel.userId}), (i:Item {id: rel.itemId})
@@ -156,7 +131,6 @@ class Neo4jClient:
         MERGE (u)-[:CREATED {createTime: rel.createTime}]->(i)
         """
         
-        # 物品属于类别关系
         item_belongs_category_query = """
         UNWIND $relationships AS rel
         MATCH (i:Item {id: rel.itemId}), (c:Category {id: rel.categoryId})
@@ -164,7 +138,6 @@ class Neo4jClient:
         MERGE (i)-[:BELONGS_TO]->(c)
         """
         
-        # 用户收藏物品关系
         user_favorite_item_query = """
         UNWIND $relationships AS rel
         MATCH (u:User {id: rel.userId}), (i:Item {id: rel.itemId})
@@ -172,7 +145,6 @@ class Neo4jClient:
         MERGE (u)-[:FAVORITED {createTime: rel.createTime}]->(i)
         """
         
-        # 用户点赞物品关系
         user_like_item_query = """
         UNWIND $relationships AS rel
         MATCH (u:User {id: rel.userId}), (i:Item {id: rel.itemId})
@@ -180,7 +152,6 @@ class Neo4jClient:
         MERGE (u)-[:LIKED {createTime: rel.createTime}]->(i)
         """
         
-        # 用户浏览物品关系
         user_view_item_query = """
         UNWIND $relationships AS rel
         MATCH (u:User {id: rel.userId}), (i:Item {id: rel.itemId})
@@ -188,7 +159,6 @@ class Neo4jClient:
         MERGE (u)-[:VIEWED {createTime: rel.createTime, extraData: rel.extraData}]->(i)
         """
         
-        # 用户购买物品关系
         user_purchase_item_query = """
         UNWIND $relationships AS rel
         MATCH (u:User {id: rel.userId}), (i:Item {id: rel.itemId})
@@ -196,7 +166,6 @@ class Neo4jClient:
         MERGE (u)-[:PURCHASED {createTime: rel.createTime, extraData: rel.extraData}]->(i)
         """
         
-        # 物品拥有标签关系
         item_has_tag_query = """
         UNWIND $relationships AS rel
         MATCH (i:Item {id: rel.itemId}), (t:Tag {id: rel.tagId})
@@ -217,25 +186,21 @@ class Neo4jClient:
         for query in queries:
             self.execute_query(query, {"relationships": relationships})
         
-        logger.info(f"创建了关系")
+        logger.info("リレーションシップの作成が完了しました")
     
     def get_statistics(self) -> Dict[str, int]:
-        """获取图数据库统计信息"""
+        """グラフデータベースの統計情報を取得する"""
         stats = {}
-        
-        # 节点统计
         node_queries = {
             "users": "MATCH (u:User) RETURN count(u) as count",
             "categories": "MATCH (c:Category) RETURN count(c) as count",
             "items": "MATCH (i:Item) RETURN count(i) as count",
             "tags": "MATCH (t:Tag) RETURN count(t) as count"
         }
-        
         for key, query in node_queries.items():
             result = self.execute_query(query)
             stats[key] = result[0]["count"] if result else 0
-        
-        # 关系统计
+            
         relationship_queries = {
             "created": "MATCH ()-[r:CREATED]->() RETURN count(r) as count",
             "belongs_to": "MATCH ()-[r:BELONGS_TO]->() RETURN count(r) as count",
@@ -245,69 +210,92 @@ class Neo4jClient:
             "purchased": "MATCH ()-[r:PURCHASED]->() RETURN count(r) as count",
             "has_tag": "MATCH ()-[r:HAS_TAG]->() RETURN count(r) as count"
         }
-        
         for key, query in relationship_queries.items():
             result = self.execute_query(query)
             stats[key] = result[0]["count"] if result else 0
-        
+            
         return stats
     
     def search_related_items(self, keywords: List[str], limit: int = 10) -> List[Dict]:
         """
-        基于关键词搜索相关景点
-        
-        Args:
-            keywords: 搜索关键词列表
-            limit: 返回结果数量限制
-            
-        Returns:
-            匹配的景点列表
+        キーワードに基づいて関連スポットを検索する（動的な関連度により厳格にフィルタリング）
         """
         if not keywords:
             return []
-        
-        # 构建搜索条件，支持标题、描述、标签的模糊匹配
-        keyword_conditions = []
-        for i, keyword in enumerate(keywords):
-            keyword_conditions.append(f"""
-                i.title CONTAINS $keyword{i} OR 
-                i.description CONTAINS $keyword{i} OR 
-                EXISTS {{
-                    MATCH (i)-[:HAS_TAG]->(t:Tag)
-                    WHERE t.name CONTAINS $keyword{i}
-                }} OR
-                EXISTS {{
-                    MATCH (i)-[:BELONGS_TO]->(c:Category)
-                    WHERE c.name CONTAINS $keyword{i}
-                }}
-            """)
-        
-        query = f"""
+            
+        query = """
         MATCH (i:Item)
-        WHERE {' OR '.join([f'({condition})' for condition in keyword_conditions])}
         OPTIONAL MATCH (i)-[:BELONGS_TO]->(c:Category)
         OPTIONAL MATCH (i)-[:HAS_TAG]->(t:Tag)
         WITH i, c, COLLECT(DISTINCT t.name) as tags
+        
+        // toLower と coalesce を使用してマッチングの堅牢性を確保（大文字小文字を区別せず、null を防止）
+        WITH i, c, tags,
+             // 第1：絶対ヒット単語数を計算（マッチした一意のキーワード数）
+             SIZE([keyword IN $keywordList WHERE 
+                toLower(coalesce(i.title, '')) CONTAINS toLower(keyword) OR 
+                toLower(coalesce(i.description, '')) CONTAINS toLower(keyword) OR 
+                toLower(coalesce(c.name, '')) CONTAINS toLower(keyword) OR 
+                ANY(tag IN tags WHERE toLower(coalesce(tag, '')) CONTAINS toLower(keyword))
+             ]) AS hitCount,
+             
+             // 第2：スコアリング戦略（タイトルヒット+10点、タグ+5点、説明+1点）
+             REDUCE(s = 0, keyword IN $keywordList | s + 
+                 CASE WHEN toLower(coalesce(i.title, '')) CONTAINS toLower(keyword) THEN 10 ELSE 0 END +
+                 CASE WHEN ANY(tag IN tags WHERE toLower(coalesce(tag, '')) CONTAINS toLower(keyword)) THEN 5 ELSE 0 END +
+                 CASE WHEN toLower(coalesce(c.name, '')) CONTAINS toLower(keyword) THEN 5 ELSE 0 END +
+                 CASE WHEN toLower(coalesce(i.description, '')) CONTAINS toLower(keyword) THEN 1 ELSE 0 END
+             ) AS relevanceScore
+             
+        // フィルタリング：少なくとも1つのキーワードにマッチするスポットのみを保持
+        WHERE hitCount > 0
+        
         RETURN DISTINCT i.id as id, 
-               i.title as title, 
-               i.description as description,
-               c.name as categoryName,
-               tags,
-               i.createTime as createTime
-        ORDER BY i.createTime DESC
-        LIMIT $limit
+                i.title as title, 
+                i.description as description,
+                c.name as categoryName,
+                tags,
+                i.createTime as createTime,
+                hitCount,
+                relevanceScore
+               
+        // ヒット単語数(hitCount)を優先し、同じ場合は重み付けスコア(relevanceScore)を比較
+        ORDER BY hitCount DESC, relevanceScore DESC, i.createTime DESC
+        // グラフ層の LIMIT を緩和し、Python メモリ内でのインテリジェントな切り捨てを容易にする
+        LIMIT 50  
         """
         
-        # 构建参数字典
-        parameters = {"limit": limit}
-        for i, keyword in enumerate(keywords):
-            parameters[f"keyword{i}"] = keyword
+        parameters = {
+            "keywordList": keywords
+        }
         
         results = self.execute_query(query, parameters)
         
-        # 格式化结果
+        if not results:
+            logger.info(f"キーワード {keywords} を使用した関連スポットは見つかりませんでした")
+            return []
+            
+        # 2. インテリジェント動的切り捨てアルゴリズム
+        max_hit_count = results[0]["hitCount"]
+        
+        # 動的な閾値ロジック：
+        if len(keywords) <= 2:
+            # キーワードが1-2個の場合、厳格なマッチングを要求
+            threshold = max_hit_count
+        else:
+            # 語彙が多い（地名＋複数の形容詞）場合、許容範囲を広げる
+            # コアワード（通常は地名＋国）が2つヒットすれば、候補に入れ、最終判断をLLMに委ねる
+            threshold = max(2, max_hit_count - 2)
+        
+        # 閾値を下回る低精度なデータをフィルタリング
+        strict_results = [r for r in results if r["hitCount"] >= threshold]
+        
+        # 3. 最終的に返す件数を取得
+        final_results = strict_results[:limit]
+        
+        # 結果のフォーマット
         formatted_results = []
-        for result in results:
+        for result in final_results:
             formatted_results.append({
                 "id": result["id"],
                 "title": result["title"],
@@ -315,11 +303,13 @@ class Neo4jClient:
                 "categoryName": result["categoryName"],
                 "tags": result["tags"],
                 "createTime": result["createTime"],
+                "hitCount": result["hitCount"],
+                "relevanceScore": result["relevanceScore"],
                 "source": "graph_search"
             })
         
-        logger.info(f"基于关键词 {keywords} 搜索到 {len(formatted_results)} 个相关景点")
+        logger.info(f"キーワード {keywords} で検索し、インテリジェントな切り捨てを経て、{len(formatted_results)} 個の高精度なスポットを返しました")
         return formatted_results
 
-# 创建全局实例
-neo4j_client = Neo4jClient() 
+# グローバルインスタンスの作成
+neo4j_client = Neo4jClient()

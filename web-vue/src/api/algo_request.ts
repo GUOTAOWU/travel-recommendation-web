@@ -2,18 +2,20 @@ import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 
-// 创建axios实例
+// axiosインスタンスの作成
 const service: AxiosInstance = axios.create({
+  // 環境変数からアルゴリズムサーバーのURLを取得（例: http://localhost:5000/api）
   baseURL: import.meta.env.VITE_ALGO_URL,
-  timeout: 60000 // 60秒超时
+  timeout: 60000 // 60秒でタイムアウト設定（重い計算処理を考慮）
 })
 
-// 请求拦截器
+// リクエストインターセプター（送信前の処理）
 service.interceptors.request.use(
   (config) => {
-    // 从localStorage获取token
+    // localStorageからJWTトークンを取得
     const token = localStorage.getItem('token')
     if (token) {
+      // リクエストヘッダーにBearerトークンを付与
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
@@ -23,27 +25,29 @@ service.interceptors.request.use(
   }
 )
 
-// 响应拦截器
+// レスポンスインターセプター（受信後の処理）
 service.interceptors.response.use(
   (response) => {
+    // サーバーからの共通レスポンス形式 { code, msg, data } を分解
     const { code, msg, data } = response.data
 
-    // 成功
+    // 成功（ステータスコード200）の場合
     if (code === 200) {
       return data
     }
 
-    // 失败
-    ElMessage.error(msg || '请求失败')
-    return Promise.reject(new Error(msg || '请求失败'))
+    // 失敗（エラーメッセージを通知）
+    ElMessage.error(msg || 'リクエストに失敗しました')
+    return Promise.reject(new Error(msg || 'リクエストに失敗しました'))
   },
   (error) => {
-    ElMessage.error(error.message || '请求失败')
+    // ネットワークエラーやHTTPステータスエラーの処理
+    ElMessage.error(error.message || 'リクエストに失敗しました')
     return Promise.reject(error)
   }
 )
 
-// 封装请求方法
+// リクエストメソッドのラップ（使いやすくカプセル化）
 const algoRequest = {
   get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
     return service.get(url, config)

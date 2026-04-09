@@ -1,5 +1,5 @@
 """
-知识图谱数据同步客户端 - 基于springboot_client封装
+知識グラフデータ同期クライアント - springboot_clientベースのラップ
 """
 from clients.springboot_client import springboot_client
 from typing import List, Dict, Any
@@ -8,13 +8,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 class KGDataClient:
-    """知识图谱数据客户端"""
+    """知識グラフデータクライアント"""
     
     def __init__(self):
         self.client = springboot_client
     
     def get_all_users(self) -> List[Dict]:
-        """获取所有用户数据"""
+        """すべてのユーザーデータを取得する"""
         try:
             all_users = []
             current = 1
@@ -30,21 +30,21 @@ class KGDataClient:
                 users = result["records"]
                 all_users.extend(users)
                 
-                # 检查是否还有更多数据
+                # さらなるデータがあるか確認
                 if len(users) < size:
                     break
                 
                 current += 1
             
-            logger.info(f"获取到 {len(all_users)} 个用户")
+            logger.info(f"{len(all_users)} 件のユーザーを取得しました")
             return all_users
             
         except Exception as e:
-            logger.error(f"获取用户数据失败: {str(e)}")
+            logger.error(f"ユーザーデータの取得に失敗しました: {str(e)}")
             return []
     
     def get_all_categories(self) -> List[Dict]:
-        """获取所有类别数据"""
+        """すべてのカテゴリデータを取得する"""
         try:
             all_categories = []
             current = 1
@@ -60,21 +60,21 @@ class KGDataClient:
                 categories = result["records"]
                 all_categories.extend(categories)
                 
-                # 检查是否还有更多数据
+                # さらなるデータがあるか確認
                 if len(categories) < size:
                     break
                 
                 current += 1
             
-            logger.info(f"获取到 {len(all_categories)} 个类别")
+            logger.info(f"{len(all_categories)} 件のカテゴリを取得しました")
             return all_categories
             
         except Exception as e:
-            logger.error(f"获取类别数据失败: {str(e)}")
+            logger.error(f"カテゴリデータの取得に失敗しました: {str(e)}")
             return []
     
     def get_all_items(self) -> List[Dict]:
-        """获取所有物品数据"""
+        """すべてのアイテム（物品）データを取得する"""
         try:
             all_items = []
             current = 1
@@ -90,21 +90,21 @@ class KGDataClient:
                 items = result["records"]
                 all_items.extend(items)
                 
-                # 检查是否还有更多数据
+                # さらなるデータがあるか確認
                 if len(items) < size:
                     break
                 
                 current += 1
             
-            logger.info(f"获取到 {len(all_items)} 个物品")
+            logger.info(f"{len(all_items)} 件のアイテムを取得しました")
             return all_items
             
         except Exception as e:
-            logger.error(f"获取物品数据失败: {str(e)}")
+            logger.error(f"アイテムデータの取得に失敗しました: {str(e)}")
             return []
     
     def get_all_user_actions(self) -> List[Dict]:
-        """获取所有用户行为数据"""
+        """すべてのユーザー行動データを取得する"""
         try:
             all_actions = []
             current = 1
@@ -120,21 +120,21 @@ class KGDataClient:
                 actions = result["records"]
                 all_actions.extend(actions)
                 
-                # 检查是否还有更多数据
+                # さらなるデータがあるか確認
                 if len(actions) < size:
                     break
                 
                 current += 1
             
-            logger.info(f"获取到 {len(all_actions)} 个用户行为")
+            logger.info(f"{len(all_actions)} 件のユーザー行動を取得しました")
             return all_actions
             
         except Exception as e:
-            logger.error(f"获取用户行为数据失败: {str(e)}")
+            logger.error(f"ユーザー行動データの取得に失敗しました: {str(e)}")
             return []
     
     def get_all_favorites(self) -> List[Dict]:
-        """获取所有收藏数据"""
+        """すべてのお気に入りデータを取得する"""
         try:
             all_favorites = []
             current = 1
@@ -150,21 +150,21 @@ class KGDataClient:
                 favorites = result["records"]
                 all_favorites.extend(favorites)
                 
-                # 检查是否还有更多数据
+                # さらなるデータがあるか確認
                 if len(favorites) < size:
                     break
                 
                 current += 1
             
-            logger.info(f"获取到 {len(all_favorites)} 个收藏")
+            logger.info(f"{len(all_favorites)} 件のお気に入りを取得しました")
             return all_favorites
             
         except Exception as e:
-            logger.error(f"获取收藏数据失败: {str(e)}")
+            logger.error(f"お気に入りデータの取得に失敗しました: {str(e)}")
             return []
     
     def get_all_likes(self) -> List[Dict]:
-        """获取所有点赞数据"""
+        """すべての「いいね」データを取得する"""
         try:
             all_likes = []
             current = 1
@@ -180,18 +180,18 @@ class KGDataClient:
                 likes = result["records"]
                 all_likes.extend(likes)
                 
-                # 检查是否还有更多数据
+                # さらなるデータがあるか確認
                 if len(likes) < size:
                     break
                 
                 current += 1
             
-            logger.info(f"获取到 {len(all_likes)} 个点赞")
+            logger.info(f"{len(all_likes)} 件の「いいね」を取得しました")
             return all_likes
             
         except Exception as e:
-            logger.error(f"获取点赞数据失败: {str(e)}")
+            logger.error(f"「いいね」データの取得に失敗しました: {str(e)}")
             return []
 
-# 创建全局实例
-kg_data_client = KGDataClient() 
+# グローバルインスタンスの作成
+kg_data_client = KGDataClient()

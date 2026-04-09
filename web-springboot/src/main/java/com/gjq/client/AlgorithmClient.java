@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 /**
- * 算法服务客户端
+ * アルゴリズムサービス・クライアント
  */
 @Component
 public class AlgorithmClient {
@@ -32,7 +32,7 @@ public class AlgorithmClient {
     private String serverUrl;
 
     /**
-     * 通用响应格式
+     * 汎用レスポンス形式
      */
     private static class Response<T> {
         private int code;
@@ -53,26 +53,28 @@ public class AlgorithmClient {
     }
 
     /**
-     * 处理响应结果
+     * レスポンス結果の処理
      *
-     * @param response 响应对象
-     * @return 响应数据
-     * @throws RuntimeException 请求失败时抛出异常
+     * @param response レスポンスオブジェクト
+     * @param <T> データ型
+     * @return レスポンスデータ
+     * @throws RuntimeException リクエスト失敗時に例外をスロー
      */
     private <T> T handleResponse(Response<T> response) {
         if (response != null && response.getCode() == 200) {
             return response.getData();
         }
-        throw new RuntimeException(response != null ? response.getMsg() : "请求失败");
+        throw new RuntimeException(response != null ? response.getMsg() : "リクエスト失敗");
     }
 
     /**
-     * 发送GET请求
+     * GETリクエストを送信
      *
-     * @param path 请求路径
-     * @param params 查询参数
-     * @return 响应数据
-     * @throws RuntimeException 请求失败时抛出异常
+     * @param path リクエストパス
+     * @param params クエリパラメータ
+     * @param <T> 期待されるデータ型
+     * @return レスポンスデータ
+     * @throws RuntimeException リクエスト失敗時に例外をスロー
      */
     public <T> T get(String path, Map<String, Object> params) {
         try {
@@ -86,18 +88,19 @@ public class AlgorithmClient {
             );
             return handleResponse(response.getBody());
         } catch (Exception e) {
-            logger.error("GET请求失败", e);
-            throw new RuntimeException("GET请求失败: " + e.getMessage());
+            logger.error("GETリクエスト失敗", e);
+            throw new RuntimeException("GETリクエスト失敗: " + e.getMessage());
         }
     }
 
     /**
-     * 发送POST请求
+     * POSTリクエストを送信
      *
-     * @param path 请求路径
-     * @param body 请求体
-     * @return 响应数据
-     * @throws RuntimeException 请求失败时抛出异常
+     * @param path リクエストパス
+     * @param body リクエストボディ
+     * @param <T> 期待されるデータ型
+     * @return レスポンスデータ
+     * @throws RuntimeException リクエスト失敗時に例外をスロー
      */
     public <T> T post(String path, Object body) {
         try {
@@ -110,25 +113,26 @@ public class AlgorithmClient {
             );
             return handleResponse(response.getBody());
         } catch (Exception e) {
-            logger.error("POST请求失败", e);
-            throw new RuntimeException("POST请求失败: " + e.getMessage());
+            logger.error("POSTリクエスト失敗", e);
+            throw new RuntimeException("POSTリクエスト失敗: " + e.getMessage());
         }
     }
 
     /**
-     * 发送带文件的POST请求
+     * ファイル付きのPOSTリクエストを送信
      *
-     * @param path 请求路径
-     * @param file 文件
-     * @param params 其他参数
-     * @return 响应数据
-     * @throws RuntimeException 请求失败时抛出异常
+     * @param path リクエストパス
+     * @param file ファイル
+     * @param params その他のパラメータ
+     * @param <T> 期待されるデータ型
+     * @return レスポンスデータ
+     * @throws RuntimeException リクエスト失敗時に例外をスロー
      */
     public <T> T postWithFile(String path, MultipartFile file, Map<String, Object> params) {
         try {
             String url = serverUrl + path;
             
-            // 构建表单数据
+            // フォームデータの構築
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             if (file != null) {
                 body.add("file", file.getResource());
@@ -145,18 +149,19 @@ public class AlgorithmClient {
             );
             return handleResponse(response.getBody());
         } catch (Exception e) {
-            logger.error("POST文件请求失败", e);
-            throw new RuntimeException("POST文件请求失败: " + e.getMessage());
+            logger.error("POSTファイルリクエスト失敗", e);
+            throw new RuntimeException("POSTファイルリクエスト失敗: " + e.getMessage());
         }
     }
 
     /**
-     * 发送PUT请求
+     * PUTリクエストを送信
      *
-     * @param path 请求路径
-     * @param body 请求体
-     * @return 响应数据
-     * @throws RuntimeException 请求失败时抛出异常
+     * @param path リクエストパス
+     * @param body リクエストボディ
+     * @param <T> 期待されるデータ型
+     * @return レスポンスデータ
+     * @throws RuntimeException リクエスト失敗時に例外をスロー
      */
     public <T> T put(String path, Object body) {
         try {
@@ -169,18 +174,19 @@ public class AlgorithmClient {
             );
             return handleResponse(response.getBody());
         } catch (Exception e) {
-            logger.error("PUT请求失败", e);
-            throw new RuntimeException("PUT请求失败: " + e.getMessage());
+            logger.error("PUTリクエスト失敗", e);
+            throw new RuntimeException("PUTリクエスト失敗: " + e.getMessage());
         }
     }
 
     /**
-     * 发送DELETE请求
+     * DELETEリクエストを送信
      *
-     * @param path 请求路径
-     * @param body 请求体
-     * @return 响应数据
-     * @throws RuntimeException 请求失败时抛出异常
+     * @param path リクエストパス
+     * @param body リクエストボディ
+     * @param <T> 期待されるデータ型
+     * @return レスポンスデータ
+     * @throws RuntimeException リクエスト失敗時に例外をスロー
      */
     public <T> T delete(String path, Object body) {
         try {
@@ -193,9 +199,9 @@ public class AlgorithmClient {
             );
             return handleResponse(response.getBody());
         } catch (Exception e) {
-            logger.error("DELETE请求失败", e);
-            throw new RuntimeException("DELETE请求失败: " + e.getMessage());
+            logger.error("DELETEリクエスト失敗", e);
+            throw new RuntimeException("DELETEリクエスト失敗: " + e.getMessage());
         }
     }
     
-} 
+}

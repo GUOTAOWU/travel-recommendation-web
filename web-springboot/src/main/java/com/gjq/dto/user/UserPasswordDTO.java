@@ -5,25 +5,25 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * 用户修改密码DTO
+ * ユーザーパスワード変更DTO
  */
 @Data
 public class UserPasswordDTO {
     /**
-     * 用户ID
+     * ユーザーID
      */
-    @NotNull(message = "用户ID不能为空")
+    @NotNull(message = "ユーザーIDは必須です")
     private Long id;
 
     /**
-     * 原密码
+     * 現在のパスワード
      */
-    @NotBlank(message = "原密码不能为空")
+    @NotBlank(message = "現在のパスワードは必須です")
     private String oldPassword;
 
     /**
-     * 新密码
+     * 新しいパスワード
      */
-    @NotBlank(message = "新密码不能为空")
+    @NotBlank(message = "新しいパスワードは必須です")
     private String newPassword;
-} 
+}

@@ -6,40 +6,40 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 用户行为查询DTO
+ * ユーザー行動検索DTO
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Schema(description = "用户行为查询DTO")
+@Schema(description = "ユーザー行動検索DTO")
 public class UserActionQueryDTO extends PageDTO {
     
     /**
-     * 用户ID
+     * ユーザーID
      */
-    @Schema(description = "用户ID")
+    @Schema(description = "ユーザーID")
     private Long userId;
     
     /**
-     * 用户名
+     * ユーザー名
      */
-    @Schema(description = "用户名")
+    @Schema(description = "ユーザー名")
     private String username;
     
     /**
-     * 景点ID
+     * 観光スポットID
      */
-    @Schema(description = "景点ID")
+    @Schema(description = "観光スポットID")
     private Long itemId;
     
     /**
-     * 景点名称
+     * 観光スポット名
      */
-    @Schema(description = "景点名称")
+    @Schema(description = "観光スポット名")
     private String itemTitle;
     
     /**
-     * 行为类型(0:浏览 1:预约)
+     * アクションタイプ（0: 閲覧、1: 予約）
      */
-    @Schema(description = "行为类型：0-浏览，1-预约")
+    @Schema(description = "アクションタイプ：0-閲覧、1-予約")
     private Integer actionType;
-} 
+}

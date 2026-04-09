@@ -2,61 +2,63 @@ import { request } from './request'
 import type { CategoryAddDTO, CategoryQueryDTO, CategoryUpdateDTO, CategoryVO, ItemAddDTO, ItemQueryDTO, ItemUpdateDTO, ItemVO } from '@/types/item'
 import type { PageVO } from '@/types/common'
 
-// 景点相关API
+/**
+ * 観光スポット（アイテム）関連API
+ */
 export const itemApi = {
   /**
-   * 添加景点
-   * @param data 景点添加DTO
+   * 観光スポットを追加します
+   * @param data 観光スポット追加用DTO
    */
   add: (data: ItemAddDTO) => {
     return request.post<number>('/item', data)
   },
 
   /**
-   * 更新景点
-   * @param data 景点更新DTO
+   * 観光スポット情報を更新します
+   * @param data 観光スポット更新用DTO
    */
   update: (data: ItemUpdateDTO) => {
     return request.put('/item', data)
   },
 
   /**
-   * 删除景点
-   * @param id 景点ID
+   * 観光スポットを削除します
+   * @param id 観光スポットID
    */
   delete: (id: number) => {
     return request.delete(`/item/${id}`)
   },
 
   /**
-   * 获取景点详情
-   * @param id 景点ID
+   * 観光スポットの詳細情報を取得します
+   * @param id 観光スポットID
    */
   getById: (id: number) => {
     return request.get<ItemVO>(`/item/${id}`)
   },
 
   /**
-   * 分页查询景点
-   * @param params 查询参数
+   * 観光スポットをページング検索します
+   * @param params 検索パラメータ（キーワード、ページ番号など）
    */
   page: (params: ItemQueryDTO) => {
     return request.get<PageVO<ItemVO>>('/item/page', { params })
   },
 
   /**
-   * 根据类别ID获取景点列表
-   * @param categoryId 类别ID
+   * カテゴリIDに基づいて観光スポット一覧を取得します
+   * @param categoryId カテゴリID
    */
   listByCategoryId: (categoryId: number) => {
     return request.get<ItemVO[]>(`/item/list/category/${categoryId}`)
   },
 
   /**
-   * 根据标签获取景点列表
-   * @param tag 标签
+   * タグに基づいて観光スポット一覧を取得します
+   * @param tag タグ名
    */
   listByTag: (tag: string) => {
     return request.get<ItemVO[]>(`/item/list/tag/${tag}`)
   }
-} 
+}

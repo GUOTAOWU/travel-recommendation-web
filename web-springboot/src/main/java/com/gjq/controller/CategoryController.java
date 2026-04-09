@@ -19,11 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * 类别控制器
+ * カテゴリコントローラー
  */
 @RestController
 @RequestMapping("/category")
-@Tag(name = "类别管理", description = "类别相关接口")
+@Tag(name = "カテゴリ管理", description = "カテゴリ関連インターフェース")
 public class CategoryController {
 
     @Autowired
@@ -33,14 +33,14 @@ public class CategoryController {
     private FileClient fileClient;
 
     /**
-     * 添加类别
+     * カテゴリを追加
      */
     @PostMapping
-    @Operation(summary = "添加类别", description = "添加类别信息")
+    @Operation(summary = "カテゴリを追加", description = "カテゴリ情報を追加します")
     public Result<Long> add(@RequestBody CategoryAddDTO dto) {
-        // 校验权限
+        // 権限チェック
         if (!SecurityUtils.isAdmin()) {
-            return Result.error("权限不足");
+            return Result.error("権限が不足しています");
         }
         
         Long id = categoryService.add(dto);
@@ -48,14 +48,14 @@ public class CategoryController {
     }
 
     /**
-     * 更新类别
+     * カテゴリを更新
      */
     @PutMapping
-    @Operation(summary = "更新类别", description = "更新类别信息")
+    @Operation(summary = "カテゴリを更新", description = "カテゴリ情報を更新します")
     public Result<Void> update(@RequestBody CategoryUpdateDTO dto) {
-        // 校验权限
+        // 権限チェック
         if (!SecurityUtils.isAdmin()) {
-            return Result.error("权限不足");
+            return Result.error("権限が不足しています");
         }
         
         categoryService.update(dto);
@@ -63,14 +63,14 @@ public class CategoryController {
     }
 
     /**
-     * 删除类别
+     * カテゴリを削除
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除类别", description = "根据ID删除类别")
-    public Result<Void> delete(@Parameter(description = "类别ID", required = true) @PathVariable Long id) {
-        // 校验权限
+    @Operation(summary = "カテゴリを削除", description = "IDに基づいてカテゴリを削除します")
+    public Result<Void> delete(@Parameter(description = "カテゴリID", required = true) @PathVariable Long id) {
+        // 権限チェック
         if (!SecurityUtils.isAdmin()) {
-            return Result.error("权限不足");
+            return Result.error("権限が不足しています");
         }
         
         categoryService.delete(id);
@@ -78,32 +78,32 @@ public class CategoryController {
     }
 
     /**
-     * 获取类别详情
+     * カテゴリ詳細を取得
      */
     @GetMapping("/{id}")
-    @Operation(summary = "获取类别详情", description = "根据ID获取类别详情")
-    public Result<CategoryVO> getById(@Parameter(description = "类别ID", required = true) @PathVariable Long id) {
+    @Operation(summary = "カテゴリ詳細を取得", description = "IDに基づいてカテゴリ詳細を取得します")
+    public Result<CategoryVO> getById(@Parameter(description = "カテゴリID", required = true) @PathVariable Long id) {
         CategoryVO vo = categoryService.getById(id);
         return Result.success(vo);
     }
 
     /**
-     * 获取类别列表
+     * カテゴリ一覧を取得
      */
     @GetMapping("/list")
-    @Operation(summary = "获取类别列表", description = "获取所有类别列表")
+    @Operation(summary = "カテゴリ一覧を取得", description = "すべてのカテゴリ一覧を取得します")
     public Result<List<CategoryVO>> list() {
         List<CategoryVO> list = categoryService.list();
         return Result.success(list);
     }
 
     /**
-     * 分页查询类别
+     * カテゴリのページング検索
      */
     @GetMapping("/page")
-    @Operation(summary = "分页查询类别", description = "分页查询类别信息")
+    @Operation(summary = "カテゴリのページング検索", description = "カテゴリ情報をページング検索します")
     public Result<Page<CategoryVO>> page(CategoryQueryDTO dto) {
         Page<CategoryVO> page = categoryService.page(dto);
         return Result.success(page);
     }
-} 
+}

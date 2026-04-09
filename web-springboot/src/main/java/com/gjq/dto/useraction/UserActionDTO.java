@@ -6,29 +6,29 @@ import lombok.Data;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 用户行为DTO
+ * ユーザー行動DTO
  */
 @Data
-@Schema(description = "用户行为DTO")
+@Schema(description = "ユーザー行動DTO")
 public class UserActionDTO {
     
     /**
-     * 物品ID
+     * アイテムID
      */
-    @NotNull(message = "物品ID不能为空")
-    @Schema(description = "物品ID", required = true)
+    @NotNull(message = "アイテムIDは必須です")
+    @Schema(description = "アイテムID", required = true)
     private Long itemId;
     
     /**
-     * 行为类型(0:浏览 1:购买)
+     * アクションタイプ (0: 閲覧, 1: 購入)
      */
-    @NotNull(message = "行为类型不能为空")
-    @Schema(description = "行为类型：0-浏览，1-购买", required = true)
+    @NotNull(message = "アクションタイプは必須です")
+    @Schema(description = "アクションタイプ：0-閲覧、1-購入", required = true)
     private Integer actionType;
     
     /**
-     * 扩展数据(JSON格式)
+     * 拡張データ (JSON形式)
      */
-    @Schema(description = "扩展数据(JSON格式)，用于存储不同场景的特定数据")
+    @Schema(description = "拡張データ (JSON形式)。異なるシナリオ固有のデータを保存するために使用")
     private String extraData;
-} 
+}

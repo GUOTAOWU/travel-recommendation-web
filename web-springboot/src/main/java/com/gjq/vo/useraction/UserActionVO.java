@@ -8,56 +8,56 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 用户行为视图对象
+ * ユーザー行動ビューオブジェクト
  */
 @Data
-@Schema(description = "用户行为视图对象")
+@Schema(description = "ユーザー行動ビューオブジェクト")
 public class UserActionVO {
     /**
      * ID
      */
-    @Schema(description = "ID")
+    @Schema(description = "アクションID")
     private Long id;
 
     /**
-     * 用户ID
+     * ユーザーID
      */
-    @Schema(description = "用户ID")
+    @Schema(description = "ユーザーID")
     private Long userId;
 
     /**
-     * 用户信息
+     * ユーザー情報
      */
-    @Schema(description = "用户信息")
+    @Schema(description = "ユーザー詳細情報")
     private UserInfo userInfo;
 
     /**
-     * 物品ID
+     * アイテムID
      */
-    @Schema(description = "物品ID")
+    @Schema(description = "アイテムID")
     private Long itemId;
 
     /**
-     * 物品信息
+     * アイテム情報
      */
-    @Schema(description = "物品信息")
+    @Schema(description = "アイテム詳細情報")
     private ItemVO item;
 
     /**
-     * 行为类型(0:浏览 1:购买)
+     * 行動タイプ(0:閲覧 1:購入)
      */
-    @Schema(description = "行为类型：0-浏览，1-购买")
+    @Schema(description = "行動タイプ：0-閲覧、1-購入")
     private Integer actionType;
 
     /**
-     * 扩展数据(JSON格式)
+     * 拡張データ(JSON形式)
      */
-    @Schema(description = "扩展数据(JSON格式)")
+    @Schema(description = "拡張データ(JSON形式)")
     private String extraData;
 
     /**
-     * 创建时间
+     * 作成時間
      */
-    @Schema(description = "创建时间")
+    @Schema(description = "アクション発生日時")
     private LocalDateTime createTime;
-} 
+}

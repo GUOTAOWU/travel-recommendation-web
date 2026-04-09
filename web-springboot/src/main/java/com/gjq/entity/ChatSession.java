@@ -8,35 +8,35 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 聊天会话实体类
+ * チャットセッションエンティティクラス
  */
 @Data
 @TableName("chat_session")
 public class ChatSession {
     
     /**
-     * 会话ID
+     * セッションID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
     
     /**
-     * 会话名称
+     * セッション名
      */
     private String sessionName;
     
     /**
-     * 创建时间
+     * 作成日時
      */
     private LocalDateTime createTime;
     
     /**
-     * 更新时间
+     * 更新日時
      */
     private LocalDateTime updateTime;
-} 
+}

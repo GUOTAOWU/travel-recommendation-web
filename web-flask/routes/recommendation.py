@@ -1,53 +1,53 @@
 """
-推荐系统路由
+推薦システムのルーティング
 """
 from flask import Blueprint, request
 from algo.knowledge_graph.recommender import kg_recommender
 from utils.response import success, error
 
-# url前缀统一需要添加/api
+# URLプレフィックスには一律で /api を追加する必要があります
 recommendation_bp = Blueprint('recommendation', __name__, url_prefix='/api/recommendation')
 
 @recommendation_bp.route('/user/<int:user_id>', methods=['GET'])
 def recommend_for_user(user_id: int):
     """
-    为用户推荐景点（基于用户）
+    ユーザーにスポットを推薦する（ユーザーベース）
     
     Args:
-        user_id: 用户ID
+        user_id: ユーザーID
         
     Returns:
-        推荐景点列表
+        推薦スポットリスト
     """
     try:
-        # 获取请求参数
+        # リクエストパラメータの取得
         limit = request.args.get('limit', default=10, type=int)
         
-        # 调用推荐算法
+        # 推薦アルゴリズムの呼び出し
         items = kg_recommender.recommend_by_user_id(user_id, limit)
         
-        return success(data=items, msg=f'为用户{user_id}生成了{len(items)}个协同过滤推荐')
+        return success(data=items, msg=f'ユーザー {user_id} に対して {len(items)} 件の協調フィルタリング推薦を生成しました')
     except Exception as e:
-        return error(msg=f'推荐生成失败: {str(e)}', code=500)
+        return error(msg=f'推薦の生成に失敗しました: {str(e)}', code=500)
 
 @recommendation_bp.route('/user/<int:user_id>/content', methods=['GET'])
 def recommend_content_for_user(user_id: int):
     """
-    为用户推荐景点（基于内容）
+    ユーザーにスポットを推薦する（コンテンツベース）
     
     Args:
-        user_id: 用户ID
+        user_id: ユーザーID
         
     Returns:
-        推荐景点列表
+        推薦スポットリスト
     """
     try:
-        # 获取请求参数
+        # リクエストパラメータの取得
         limit = request.args.get('limit', default=10, type=int)
         
-        # 调用推荐算法
+        # 推薦アルゴリズムの呼び出し
         items = kg_recommender.recommend_by_content(user_id, limit)
         
-        return success(data=items, msg=f'为用户{user_id}生成了{len(items)}个基于内容的推荐')
+        return success(data=items, msg=f'ユーザー {user_id} に対して {len(items)} 件のコンテンツベースの推薦を生成しました')
     except Exception as e:
-        return error(msg=f'推荐生成失败: {str(e)}', code=500)
+        return error(msg=f'推薦の生成に失敗しました: {str(e)}', code=500)

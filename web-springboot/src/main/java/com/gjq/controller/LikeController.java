@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 点赞控制器
+ * いいねコントローラー
  */
 @RestController
 @RequestMapping("/like")
@@ -25,36 +25,36 @@ public class LikeController {
     private LikeService likeService;
 
     /**
-     * 点赞
+     * いいねを登録
      *
-     * @param likeDTO 点赞DTO
-     * @return 结果
+     * @param likeDTO いいねDTO
+     * @return 実行結果
      */
     @PostMapping
     public Result<?> like(@RequestBody LikeDTO likeDTO) {
         Long userId = SecurityUtils.getUserId();
         boolean success = likeService.like(userId, likeDTO.getItemId());
-        return success ? Result.success() : Result.error("点赞失败");
+        return success ? Result.success() : Result.error("いいねに失敗しました");
     }
 
     /**
-     * 取消点赞
+     * いいねを解除
      *
-     * @param itemId 物品ID
-     * @return 结果
+     * @param itemId アイテムID
+     * @return 実行結果
      */
     @DeleteMapping("/{itemId}")
     public Result<?> unlike(@PathVariable Long itemId) {
         Long userId = SecurityUtils.getUserId();
         boolean success = likeService.unlike(userId, itemId);
-        return success ? Result.success() : Result.error("取消点赞失败");
+        return success ? Result.success() : Result.error("いいね解除に失敗しました");
     }
 
     /**
-     * 查询点赞状态
+     * いいね状態を確認
      *
-     * @param itemId 物品ID
-     * @return 点赞状态
+     * @param itemId アイテムID
+     * @return いいね状態
      */
     @GetMapping("/status/{itemId}")
     public Result<Boolean> status(@PathVariable Long itemId) {
@@ -64,10 +64,10 @@ public class LikeController {
     }
 
     /**
-     * 查询物品点赞数
+     * アイテムのいいね数を取得
      *
-     * @param itemId 物品ID
-     * @return 点赞数
+     * @param itemId アイテムID
+     * @return いいね数
      */
     @GetMapping("/count/{itemId}")
     public Result<Long> count(@PathVariable Long itemId) {
@@ -76,10 +76,10 @@ public class LikeController {
     }
 
     /**
-     * 批量查询物品点赞状态和点赞数
+     * アイテムのいいね状態といいね数を一括確認
      *
-     * @param itemIds 物品ID列表
-     * @return 点赞状态和点赞数
+     * @param itemIds アイテムIDリスト
+     * @return いいね状態といいね数のマップ
      */
     @GetMapping("/batch")
     public Result<Map<Long, Map<String, Object>>> batchStatus(@RequestParam List<Long> itemIds) {
@@ -97,9 +97,9 @@ public class LikeController {
     }
 
     /**
-     * 获取用户点赞的物品ID列表
+     * ユーザーがいいねしたアイテムIDリストを取得
      *
-     * @return 物品ID列表
+     * @return アイテムIDリスト
      */
     @GetMapping("/user/items")
     public Result<List<Long>> userLikedItems() {
@@ -109,10 +109,9 @@ public class LikeController {
     }
     
     /**
-     * 管理员分页获取所有点赞数据
-     * 
-     * @param pageDTO 分页参数
-     * @return 点赞数据列表
+     * 管理者用：全いいねデータのページング取得
+     * * @param pageDTO ページングパラメータ
+     * @return いいねデータ一覧
      */
     @GetMapping("/admin/page")
     public Result<Page<Like>> adminLikePage(PageDTO pageDTO) {
@@ -120,4 +119,4 @@ public class LikeController {
         Page<Like> resultPage = likeService.page(page);
         return Result.success(resultPage);
     }
-} 
+}

@@ -9,16 +9,15 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * 聊天会话Mapper接口
+ * チャットセッションMapperインターフェース
  */
 @Mapper
 public interface ChatSessionMapper extends BaseMapper<ChatSession> {
     
     /**
-     * 查询用户的所有聊天会话，并附带最新的一条消息作为预览
-     * 
-     * @param userId 用户ID
-     * @return 聊天会话列表
+     * ユーザーのすべてのチャットセッションを検索し、最新のメッセージをプレビューとして取得します
+     * * @param userId ユーザーID
+     * @return チャットセッションリスト
      */
     @Select("SELECT s.*, m.content as latest_message FROM chat_session s " +
             "LEFT JOIN (SELECT cm.session_id, cm.content " +
@@ -31,4 +30,4 @@ public interface ChatSessionMapper extends BaseMapper<ChatSession> {
             "WHERE s.user_id = #{userId} " +
             "ORDER BY s.update_time DESC")
     List<ChatSession> selectSessionsWithLatestMessage(@Param("userId") Long userId);
-} 
+}

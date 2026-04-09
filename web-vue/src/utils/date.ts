@@ -1,12 +1,12 @@
 /**
- * 日期格式化工具函数
+ * 日付フォーマット用ユーティリティ関数
  */
 
 /**
- * 格式化日期
- * @param date 日期对象或字符串
- * @param format 格式化字符串，支持YYYY-MM-DD HH:mm:ss
- * @returns 格式化后的日期字符串
+ * 日付をフォーマットする
+ * @param date 日付オブジェクトまたは文字列
+ * @param format フォーマット文字列、YYYY-MM-DD HH:mm:ss をサポート
+ * @returns フォーマットされた日付文字列
  */
 export function formatDate(date: Date | string, format: string = 'YYYY-MM-DD'): string {
   const d = typeof date === 'string' ? new Date(date) : date
@@ -28,16 +28,16 @@ export function formatDate(date: Date | string, format: string = 'YYYY-MM-DD'): 
 }
 
 /**
- * 计算相对时间（几分钟前，几小时前，几天前等）
- * @param date 日期对象或字符串
- * @returns 相对时间字符串
+ * 相対時間を計算する（数分前、数時間前、数日前など）
+ * @param date 日付オブジェクトまたは文字列
+ * @returns 相対時間の文字列
  */
 export function relativeTime(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date
   const now = new Date()
   const diff = now.getTime() - d.getTime()
   
-  // 计算时间差
+  // 時間差の計算
   const seconds = Math.floor(diff / 1000)
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
@@ -48,14 +48,14 @@ export function relativeTime(date: Date | string): string {
   if (years > 0) {
     return `${years}年前`
   } else if (months > 0) {
-    return `${months}个月前`
+    return `${months}ヶ月前`
   } else if (days > 0) {
-    return `${days}天前`
+    return `${days}日前`
   } else if (hours > 0) {
-    return `${hours}小时前`
+    return `${hours}時間前`
   } else if (minutes > 0) {
-    return `${minutes}分钟前`
+    return `${minutes}分前`
   } else {
-    return '刚刚'
+    return 'たった今'
   }
-} 
+}

@@ -6,32 +6,32 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 收藏VO
+ * お気に入りビューオブジェクト (VO)
  */
 @Data
 public class FavoriteVO {
     /**
-     * 收藏ID
+     * お気に入りID
      */
     private Long id;
 
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
 
     /**
-     * 物品ID
+     * アイテムID
      */
     private Long itemId;
 
     /**
-     * 物品信息
+     * アイテム詳細情報
      */
     private ItemVO item;
 
     /**
-     * 创建时间
+     * お気に入り登録日時
      */
     private LocalDateTime createTime;
-} 
+}

@@ -1,43 +1,43 @@
 import { request } from './request'
 import type { LikeDTO, LikeStatusResponse, BatchLikeStatusResponse } from '@/types/like'
 
-// 点赞相关API
+// いいね関連API
 export const likeApi = {
   /**
-   * 点赞
-   * @param data 点赞DTO
+   * いいね
+   * @param data いいねDTO
    */
   like: (data: LikeDTO) => {
     return request.post('/like', data)
   },
 
   /**
-   * 取消点赞
-   * @param itemId 景点ID
+   * いいね取り消し
+   * @param itemId 観光スポットID
    */
   unlike: (itemId: number) => {
     return request.delete(`/like/${itemId}`)
   },
 
   /**
-   * 查询点赞状态
-   * @param itemId 景点ID
+   * いいね状態の照会
+   * @param itemId 観光スポットID
    */
   status: (itemId: number) => {
     return request.get<boolean>(`/like/status/${itemId}`)
   },
 
   /**
-   * 查询景点点赞数
-   * @param itemId 景点ID
+   * 観光スポットのいいね数を照会
+   * @param itemId 観光スポットID
    */
   count: (itemId: number) => {
     return request.get<number>(`/like/count/${itemId}`)
   },
 
   /**
-   * 批量查询景点点赞状态和点赞数
-   * @param itemIds 景点ID列表
+   * 観光スポットのいいね状態といいね数を一括照会
+   * @param itemIds 観光スポットIDリスト
    */
   batchStatus: (itemIds: number[]) => {
     return request.get<BatchLikeStatusResponse>('/like/batch', {
@@ -46,9 +46,9 @@ export const likeApi = {
   },
 
   /**
-   * 获取用户点赞的景点ID列表
+   * ユーザーがいいねした観光スポットIDリストを取得
    */
   userLikedItems: () => {
     return request.get<number[]>('/like/user/items')
   }
-} 
+}

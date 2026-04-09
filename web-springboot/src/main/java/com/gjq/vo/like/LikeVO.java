@@ -5,27 +5,27 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 点赞VO
+ * いいねビューオブジェクト (VO)
  */
 @Data
 public class LikeVO {
     /**
-     * 点赞ID
+     * いいねID
      */
     private Long id;
 
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
 
     /**
-     * 物品ID
+     * アイテムID
      */
     private Long itemId;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     private LocalDateTime createTime;
-} 
+}

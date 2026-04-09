@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 用户行为Service实现类
+ * ユーザー行動サービス実装クラス
  */
 @Service
 public class UserActionServiceImpl extends ServiceImpl<UserActionMapper, UserAction> implements UserActionService {
@@ -56,16 +56,16 @@ public class UserActionServiceImpl extends ServiceImpl<UserActionMapper, UserAct
         userAction.setActionType(dto.getActionType());
         userAction.setExtraData(dto.getExtraData());
         
-        // 保存用户行为记录
+        // ユーザー行動記録を保存
         return save(userAction);
     }
 
     @Override
     public Page<UserActionVO> pageUserActions(UserActionQueryDTO dto) {
-        // 构建查询条件
+        // 検索条件を構築
         LambdaQueryWrapper<UserAction> queryWrapper = new LambdaQueryWrapper<>();
         
-        // 处理用户名模糊查询
+        // ユーザー名のあいまい検索を処理
         if (StringUtils.hasText(dto.getUsername())) {
             List<User> users = userMapper.selectList(new LambdaQueryWrapper<User>()
                     .like(User::getUsername, dto.getUsername()));
@@ -73,15 +73,15 @@ public class UserActionServiceImpl extends ServiceImpl<UserActionMapper, UserAct
                 List<Long> userIdList = users.stream().map(User::getId).toList();
                 queryWrapper.in(UserAction::getUserId, userIdList);
             } else {
-                // 如果没有匹配的用户，返回空结果
+                // 一致するユーザーがいない場合、空の結果を返す
                 return new Page<>();
             }
         } else if (dto.getUserId() != null) {
-            // 如果指定了用户ID
+            // ユーザーIDが指定されている場合
             queryWrapper.eq(UserAction::getUserId, dto.getUserId());
         }
         
-        // 处理景点名称模糊查询
+        // 観光スポット名のあいまい検索を処理
         if (StringUtils.hasText(dto.getItemTitle())) {
             List<Item> items = itemMapper.selectList(new LambdaQueryWrapper<Item>()
                     .like(Item::getTitle, dto.getItemTitle()));
@@ -89,38 +89,38 @@ public class UserActionServiceImpl extends ServiceImpl<UserActionMapper, UserAct
                 List<Long> itemIdList = items.stream().map(Item::getId).toList();
                 queryWrapper.in(UserAction::getItemId, itemIdList);
             } else {
-                // 如果没有匹配的景点，返回空结果
+                // 一致するスポットがない場合、空の結果を返す
                 return new Page<>();
             }
         } else if (dto.getItemId() != null) {
-            // 如果指定了景点ID
+            // スポットIDが指定されている場合
             queryWrapper.eq(UserAction::getItemId, dto.getItemId());
         }
         
-        // 如果指定了行为类型
+        // アクションタイプが指定されている場合
         if (dto.getActionType() != null) {
             queryWrapper.eq(UserAction::getActionType, dto.getActionType());
         }
         
-        // 按时间倒序排序
+        // 日時の降順でソート
         queryWrapper.orderByDesc(UserAction::getCreateTime);
         
-        // 分页查询
+        // ページング検索
         Page<UserAction> page = new Page<>(dto.getCurrent(), dto.getSize());
         page = page(page, queryWrapper);
         
-        // 转换为VO
+        // VOへ変換
         Page<UserActionVO> voPage = new Page<>();
         BeanUtils.copyProperties(page, voPage, "records");
         
-        // 处理records
+        // レコードの処理
         if (page.getRecords() != null && !page.getRecords().isEmpty()) {
-            // 获取所有用户ID
+            // すべてのユーザーIDを取得
             List<Long> userIds = new ArrayList<>();
-            // 获取所有景点ID
+            // すべてのスポットIDを取得
             List<Long> itemIds = new ArrayList<>();
             
-            // 收集所有ID
+            // すべてのIDを収集
             for (UserAction userAction : page.getRecords()) {
                 if (userAction.getUserId() != null) {
                     userIds.add(userAction.getUserId());
@@ -130,32 +130,32 @@ public class UserActionServiceImpl extends ServiceImpl<UserActionMapper, UserAct
                 }
             }
             
-            // 批量查询用户信息
+            // ユーザー情報を一括取得
             Map<Long, User> userMap = new HashMap<>();
             if (!userIds.isEmpty()) {
                 List<User> users = userMapper.selectBatchIds(userIds);
                 users.forEach(user -> userMap.put(user.getId(), user));
             }
             
-            // 批量查询景点信息
+            // スポット情報を一括取得
             Map<Long, Item> itemMap = new HashMap<>();
             if (!itemIds.isEmpty()) {
                 List<Item> items = itemMapper.selectBatchIds(itemIds);
                 items.forEach(item -> itemMap.put(item.getId(), item));
             }
             
-            // 转换成VO
+            // VOに変換
             List<UserActionVO> voList = new ArrayList<>();
             for (UserAction userAction : page.getRecords()) {
                 UserActionVO vo = toVO(userAction);
                 
-                // 设置用户信息
+                // ユーザー情報を設定
                 User user = userMap.get(userAction.getUserId());
                 if (user != null) {
                     vo.setUserInfo(new UserInfo(user, fileClient));
                 }
                 
-                // 设置景点信息
+                // スポット情報を設定
                 Item item = itemMap.get(userAction.getItemId());
                 if (item != null) {
                     vo.setItem(itemService.toVO(item));
@@ -188,7 +188,7 @@ public class UserActionServiceImpl extends ServiceImpl<UserActionMapper, UserAct
             return false;
         }
         
-        // 批量删除记录
+        // 記録を一括削除
         return removeBatchByIds(ids);
     }
     
@@ -199,23 +199,23 @@ public class UserActionServiceImpl extends ServiceImpl<UserActionMapper, UserAct
             return false;
         }
         
-        // 构建查询条件，确保只删除当前用户自己的记录
+        // 現在のユーザー自身の記録のみを削除するように検索条件を構築
         LambdaQueryWrapper<UserAction> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserAction::getUserId, userId)
                     .in(UserAction::getId, ids);
         
-        // 删除符合条件的记录
+        // 条件に一致する記録を削除
         return remove(queryWrapper);
     }
     
     @Override
     public long getActionCountByItemIdAndType(Long itemId, int actionType) {
-        // 构建查询条件
+        // 検索条件を構築
         LambdaQueryWrapper<UserAction> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserAction::getItemId, itemId)
-                   .eq(UserAction::getActionType, actionType);
+                    .eq(UserAction::getActionType, actionType);
         
-        // 统计记录数量
+        // 記録件数を集計
         return count(queryWrapper);
     }
-} 
+}

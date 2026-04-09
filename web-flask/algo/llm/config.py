@@ -1,8 +1,8 @@
 """
-LLM配置文件
+LLM設定ファイル
 """
 
-# 模型配置
+# モデル設定
 MODEL_CONFIGS = {
     'qwen-plus': {
         'name': 'Qwen-Plus',
@@ -46,10 +46,10 @@ MODEL_CONFIGS = {
     }
 }
 
-# 默认模型
+# デフォルトモデル
 DEFAULT_MODEL = 'qwen-turbo' 
 
-# 可用模型
+# 利用可能なモデル一覧
 AVAILABLE_MODELS = [
     {'key': key, 'name': config['name']}
     for key, config in MODEL_CONFIGS.items()

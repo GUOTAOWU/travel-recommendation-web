@@ -6,46 +6,46 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 物品类别实体类
+ * カテゴリエンティティクラス
  */
 @Data
 @TableName("category")
 public class Category {
     /**
-     * 类别ID
+     * カテゴリID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 类别名称
+     * カテゴリ名
      */
     private String name;
 
     /**
-     * 类别描述
+     * カテゴリ説明
      */
     private String description;
 
     /**
-     * 图标存储桶
+     * アイコンのバケット名
      */
     private String iconBucket;
 
     /**
-     * 图标对象键
+     * アイコンのオブジェクトキー
      */
     private String iconObjectKey;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
-     * 更新时间
+     * 更新日時
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-} 
+}

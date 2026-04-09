@@ -1,7 +1,7 @@
 import type { UserInfo } from './user'
 
 /**
- * 评论对象类型
+ * コメントオブジェクト型（VO）
  */
 export interface CommentVO {
   id: number
@@ -9,17 +9,17 @@ export interface CommentVO {
   userInfo: UserInfo
   itemId: number
   content: string
-  parentId?: number
-  replyToCommentId?: number
-  replyToUserId?: number
-  replyToUserInfo?: UserInfo
-  replies?: CommentVO[]
+  parentId?: number            // 親コメントのID（スレッド用）
+  replyToCommentId?: number    // 返信先のコメントID
+  replyToUserId?: number       // 返信先のユーザーID
+  replyToUserInfo?: UserInfo   // 返信先のユーザー情報
+  replies?: CommentVO[]        // 返信リスト（ネストされたコメント）
   createTime: string
   updateTime: string
 }
 
 /**
- * 评论添加DTO
+ * コメント追加用DTO
  */
 export interface CommentAddDTO {
   itemId: number
@@ -30,12 +30,12 @@ export interface CommentAddDTO {
 }
 
 /**
- * 评论查询DTO
+ * コメント検索用DTO
  */
 export interface CommentQueryDTO {
   itemId?: number
   userId?: number
-  onlyParent?: boolean
+  onlyParent?: boolean         // 親コメントのみを取得するかどうか
   pageNo?: number
   pageSize?: number
-} 
+}

@@ -3,7 +3,7 @@ package com.gjq.common.exception;
 import lombok.Getter;
 
 /**
- * 业务异常
+ * 業務例外
  */
 @Getter
 public class BusinessException extends RuntimeException {
@@ -18,4 +18,4 @@ public class BusinessException extends RuntimeException {
         super(message);
         this.code = code;
     }
-} 
+}

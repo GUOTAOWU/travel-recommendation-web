@@ -6,30 +6,30 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 点赞实体类
+ * いいねエンティティクラス
  */
 @Data
 @TableName("item_like")
 public class Like {
     /**
-     * 点赞ID
+     * いいねID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
 
     /**
-     * 物品ID
+     * アイテムID
      */
     private Long itemId;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
-} 
+}

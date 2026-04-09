@@ -1,6 +1,8 @@
 """
-LLM路由
+LLM ルーティング
 """
+import random
+import re
 from flask import Blueprint, request, jsonify, Response, stream_with_context
 from typing import List
 from algo.llm.llm_client import LLMClient
@@ -8,57 +10,33 @@ from algo.llm.config import AVAILABLE_MODELS, DEFAULT_MODEL
 from utils.response import success, error
 from algo.knowledge_graph.neo4j_client import neo4j_client
 
-
 llm_bp = Blueprint('llm', __name__, url_prefix='/api/llm')
 
 @llm_bp.route('/models', methods=['GET'])
 def get_models():
-    """获取可用模型列表
-    
-    Returns:
-        模型列表
-    """
+    """利用可能なモデルの一覧を取得する"""
     return success(AVAILABLE_MODELS)
 
 @llm_bp.route('/chat', methods=['POST'])
 def chat():
-    """普通对话接口
-    
-    请求体:
-        model: 模型名称，可选，默认为DEFAULT_MODEL
-        messages: 消息列表，每个消息包含role和content
-        
-    Returns:
-        模型返回的文本内容
-    """
+    """標準的なチャットインターフェース"""
     try:
         data = request.json
         model_name = data.get('model', DEFAULT_MODEL)
         messages = data.get('messages', [])
         
         if not messages:
-            return error('消息列表不能为空')
+            return error('メッセージリストを空にすることはできません')
         
         client = LLMClient(model_name)
         response = client.chat(messages)
         return success(response)
     except Exception as e:
-        return error(f'聊天失败: {str(e)}')
-
+        return error(f'チャットに失敗しました: {str(e)}')
 
 @llm_bp.route('/recommend', methods=['POST'])
 def recommend_from_chat():
-    """基于聊天内容推荐景点
-    
-    请求体:
-        model: 模型名称，可选，默认为DEFAULT_MODEL
-        messages: 消息列表，每个消息包含role和content
-        userId: 用户ID，必传
-        limit: 返回的推荐数量，默认10
-        
-    Returns:
-        推荐景点列表和提取的关键词
-    """
+    """チャット内容に基づいた観光スポットの推薦"""
     try:
         data = request.json
         model_name = data.get('model', DEFAULT_MODEL)
@@ -67,66 +45,47 @@ def recommend_from_chat():
         limit = data.get('limit', 10)
         
         if not messages:
-            return error('消息列表不能为空')
+            return error('メッセージリストを空にすることはできません')
         
         if user_id is None:
-            return error('用户ID不能为空')
+            return error('ユーザーIDは必須です')
         
-        # 提取关键词
         client = LLMClient(model_name)
         keywords = client.extract_keywords(messages)
         
-        # 如果关键词为空，返回用户历史交互景点
+        # キーワードが抽出できない、または空の結果が返された場合のフォールバック
         if not keywords or (isinstance(keywords, list) and keywords[0] == '空字符串'):
             history_items = get_user_history_items(user_id, limit)
             return success({
                 "items": history_items,
                 "keywords": [],
-                "message": "未能从对话中提取到有效的景点关键词，为您推荐您可能感兴趣的景点",
-                "isHistoryItems": True  # 标识这是历史交互景点
+                "message": "対話から有効なスポットキーワードを抽出できなかったため、興味のありそうなスポットを推薦します",
+                "isHistoryItems": True
             })
         
-        # 基于关键词构建Neo4j查询，利用Tag节点进行更精确的匹配
         query = """
-        // 基于关键词匹配景点
         MATCH (i:Item)
         MATCH (creator:User)-[:CREATED]->(i)
-        
-        // 关联景点所属类别和标签
         MATCH (i)-[:BELONGS_TO]->(c:Category)
         OPTIONAL MATCH (i)-[:HAS_TAG]->(t:Tag)
-        
-        // 收集标签信息
         WITH i, creator, c, COLLECT(DISTINCT t.name) AS tagNames
-        
-        // 进行关键词匹配
         WITH i, creator, c, tagNames,
-             // 匹配标题、描述、原始标签或Tag节点中包含关键词的景点
              (
                  ANY(keyword IN $keywords WHERE toLower(i.title) CONTAINS toLower(keyword)) OR
                  ANY(keyword IN $keywords WHERE toLower(i.description) CONTAINS toLower(keyword)) OR
                  ANY(keyword IN $keywords WHERE toLower(coalesce(i.tags, '')) CONTAINS toLower(keyword)) OR
                  ANY(keyword IN $keywords WHERE ANY(tag IN tagNames WHERE toLower(tag) CONTAINS toLower(keyword)))
              ) AS keywordMatch
-        
-        // 只返回匹配关键词的景点
         WHERE keywordMatch
-        
-        // 计算热门度和匹配度
         WITH i, creator, c, tagNames,
              SIZE([(i)<-[:VIEWED|PURCHASED|FAVORITED|LIKED]-() | true]) AS popularity,
-             // 计算关键词匹配度得分
              (
                  SIZE([keyword IN $keywords WHERE toLower(i.title) CONTAINS toLower(keyword)]) * 3.0 +
                  SIZE([keyword IN $keywords WHERE toLower(i.description) CONTAINS toLower(keyword)]) * 2.0 +
                  SIZE([keyword IN $keywords WHERE toLower(coalesce(i.tags, '')) CONTAINS toLower(keyword)]) * 2.0 +
                  SIZE([keyword IN $keywords WHERE ANY(tag IN tagNames WHERE toLower(tag) CONTAINS toLower(keyword))]) * 2.5
              ) AS matchScore
-        
-        // 计算综合得分
         WITH i, creator, c, tagNames, (matchScore * 10 + popularity * 0.1) AS totalScore
-        
-        // 返回匹配结果
         RETURN i.id AS id, i.title AS title, i.description AS description, 
                i.tags AS tags, i.coverBucket AS coverBucket, i.coverObjectKey AS coverObjectKey,
                creator.username AS username, creator.realName AS userRealName,
@@ -135,7 +94,6 @@ def recommend_from_chat():
         LIMIT $limit
         """
         
-        # 执行查询
         params = {
             "keywords": keywords,
             "userId": user_id,
@@ -144,102 +102,81 @@ def recommend_from_chat():
         
         items = neo4j_client.execute_query(query, params)
         
-        # 如果没有找到匹配的景点，返回用户历史交互景点
         if not items:
             history_items = get_user_history_items(user_id, limit)
             return success({
                 "items": history_items,
                 "keywords": keywords,
-                "message": f"没有找到与 {', '.join(keywords)} 相关的新景点，为您推荐了一些您可能感兴趣的景点",
-                "isHistoryItems": True  # 标识这是历史交互景点
+                "message": f"{', '.join(keywords)} に関連する新しいスポットが見つからなかったため、興味のありそうなスポットを推薦します",
+                "isHistoryItems": True
             })
         
-        # 处理标签字段，合并原始标签和Tag节点标签
         for item in items:
             original_tags = []
             if "tags" in item and item["tags"] and isinstance(item["tags"], str):
                 original_tags = [tag.strip() for tag in item["tags"].split(",") if tag.strip()]
             
-            # 合并原始标签和Tag节点标签
             tag_names = item.get("tagNames", [])
             all_tags = list(set(original_tags + [tag for tag in tag_names if tag]))
             item["tags"] = all_tags
             
-            # 清理tagNames字段
             if "tagNames" in item:
                 del item["tagNames"]
         
         return success({
             "items": items,
             "keywords": keywords,
-            "message": "根据您的偏好，为您推荐以下景点",
-            "isHistoryItems": False  # 标识这是关键词匹配景点
+            "message": "お客様の好みに基づいて、以下のスポットを推薦します",
+            "isHistoryItems": False
         })
     except Exception as e:
-        return error(f'基于对话生成景点推荐失败: {str(e)}')
+        return error(f'対話ベースの推薦生成に失敗しました: {str(e)}')
 
 def get_user_history_items(user_id: int, limit: int = 10) -> list:
-    """获取用户历史交互的景点
-    
-    Args:
-        user_id: 用户ID
-        limit: 返回数量限制
-        
-    Returns:
-        用户交互过的景点列表，按景点ID去重，合并交互类型
-    """
-    # 查询用户交互过的景点，按景点ID分组，合并交互类型
+    """ユーザーの過去のインタラクション履歴からスポットを取得する"""
     query = """
-    // 查找用户交互过的景点
     MATCH (u:User {id: $userId})-[r:VIEWED|PURCHASED|FAVORITED|LIKED]->(i:Item)-[:BELONGS_TO]->(c:Category)
     MATCH (creator:User)-[:CREATED]->(i)
-    
-    // 获取Tag节点信息
     OPTIONAL MATCH (i)-[:HAS_TAG]->(tag:Tag)
     
     WITH i, creator, c, r, TYPE(r) AS interactionType,
          CASE TYPE(r)
-           WHEN 'PURCHASED' THEN 4  // 预约权重最高
-           WHEN 'FAVORITED' THEN 3  // 收藏次之
-           WHEN 'LIKED' THEN 2      // 点赞再次
-           WHEN 'VIEWED' THEN 1     // 浏览权重最低
+           WHEN 'PURCHASED' THEN 4  
+           WHEN 'FAVORITED' THEN 3  
+           WHEN 'LIKED' THEN 2      
+           WHEN 'VIEWED' THEN 1     
            ELSE 0
          END AS typeWeight,
          r.createTime AS interactionTime,
          COLLECT(DISTINCT tag.name) AS tagNames
     
-    // 按景点ID分组，收集所有交互类型
     WITH i.id AS itemId, i, creator, c, tagNames,
          COLLECT({
            type: interactionType,
            weight: typeWeight,
            time: interactionTime,
            label: CASE interactionType
-             WHEN 'PURCHASED' THEN '您预约过'
-             WHEN 'FAVORITED' THEN '您收藏过'
-             WHEN 'LIKED' THEN '您点赞过'
-             WHEN 'VIEWED' THEN '您浏览过'
+             WHEN 'PURCHASED' THEN '予約済み'
+             WHEN 'FAVORITED' THEN 'お気に入り済み'
+             WHEN 'LIKED' THEN 'いいね済み'
+             WHEN 'VIEWED' THEN '閲覧済み'
              ELSE ''
            END
          }) AS interactions
     
-    // 计算最高权重和最新时间
     WITH itemId, i, creator, c, tagNames, interactions,
          REDUCE(maxWeight = 0, interaction IN interactions | 
            CASE WHEN interaction.weight > maxWeight THEN interaction.weight ELSE maxWeight END) AS maxWeight,
          REDUCE(latestTime = datetime(), interaction IN interactions | 
            CASE WHEN interaction.time > latestTime THEN interaction.time ELSE latestTime END) AS latestTime
     
-    // 按最高权重和最新时间排序
     ORDER BY maxWeight DESC, latestTime DESC
     
-    // 返回结果，合并交互类型信息
     RETURN itemId AS id, i.title AS title, i.description AS description, 
            i.tags AS tags, i.coverBucket AS coverBucket, i.coverObjectKey AS coverObjectKey,
            creator.username AS username, creator.realName AS userRealName,
            c.name AS categoryName, tagNames,
            interactions AS allInteractions,
-           // 生成合并的交互标签
            REDUCE(labels = [], interaction IN interactions | 
              CASE WHEN interaction.label IN labels THEN labels ELSE labels + [interaction.label] END
            ) AS interactionLabels
@@ -250,27 +187,21 @@ def get_user_history_items(user_id: int, limit: int = 10) -> list:
     
     try:
         items = neo4j_client.execute_query(query, params)
-        
-        # 处理标签字段，合并原始标签和Tag节点标签
         for item in items:
             original_tags = []
             if "tags" in item and item["tags"] and isinstance(item["tags"], str):
                 original_tags = [tag.strip() for tag in item["tags"].split(",") if tag.strip()]
             
-            # 合并原始标签和Tag节点标签
             tag_names = item.get("tagNames", [])
             all_tags = list(set(original_tags + [tag for tag in tag_names if tag]))
             item["tags"] = all_tags
             
-            # 清理tagNames字段
             if "tagNames" in item:
                 del item["tagNames"]
             
-            # 处理交互类型信息
             all_interactions = item.get("allInteractions", [])
             interaction_labels = item.get("interactionLabels", [])
             
-            # 设置主要交互类型（权重最高的）
             if all_interactions:
                 primary_interaction = max(all_interactions, key=lambda x: x.get("weight", 0))
                 item["interactionType"] = primary_interaction.get("type", "")
@@ -279,59 +210,99 @@ def get_user_history_items(user_id: int, limit: int = 10) -> list:
                 item["interactionType"] = ""
                 item["interactionLabel"] = ""
             
-            # 生成合并的交互描述
             if len(interaction_labels) == 1:
-                item["interactionDescription"] = interaction_labels[0]
+                item["interactionDescription"] = f"以前、{interaction_labels[0]}"
             elif len(interaction_labels) > 1:
-                # 将多个交互类型合并为一个描述
-                item["interactionDescription"] = f"您{'、'.join([label.replace('您', '').replace('过', '') for label in interaction_labels])}过"
+                # 複数のアクションがある場合にラベルを結合する（例：「予約・お気に入り・閲覧済み」）
+                combined_labels = '・'.join([label.replace('済み', '') for label in interaction_labels])
+                item["interactionDescription"] = f"以前、{combined_labels}済み"
             else:
-                item["interactionDescription"] = "您交互过"
+                item["interactionDescription"] = "以前にインタラクションあり"
             
-            # 清理临时字段
             if "allInteractions" in item:
                 del item["allInteractions"]
             if "interactionLabels" in item:
                 del item["interactionLabels"]
-            
-            # 添加一个score字段，保持与推荐结果格式一致
             item["score"] = 0
         
         return items
     except Exception as e:
-        print(f"获取用户历史交互景点失败: {str(e)}")
+        print(f"ユーザー履歴の取得に失敗しました: {str(e)}")
         return []
-
 
 @llm_bp.route('/chat-with-graph-rag', methods=['POST'])
 def chat_with_graph_rag():
-    """使用GraphRAG增强的对话接口
-    
-    请求体:
-        model: 模型名称，可选，默认为DEFAULT_MODEL
-        messages: 消息列表，每个消息包含role和content
-        
-    Returns:
-        基于图数据库上下文增强的模型回复和搜索信息
-    """
+    """GraphRAGを利用した拡張対話インターフェース"""
     try:
         data = request.json
         model_name = data.get('model', DEFAULT_MODEL)
         messages = data.get('messages', [])
+        user_id = data.get('userId')
         
         if not messages:
-            return error('消息列表不能为空')
+            return error('メッセージリストを空にすることはできません')
         
-        # 初始化LLM客户端
         client = LLMClient(model_name)
         
-        # 从历史对话中提取关键词
-        keywords = client.extract_keywords(messages)
+        # デフォルトの推奨件数
+        target_count = 5 
+        last_content = messages[-1].get('content', '') if messages else ''
         
-        # 构建图数据库上下文并获取搜索结果信息
-        graph_context, search_info = _build_graph_context_with_info(keywords)
+        # ユーザーのリクエストから件数を抽出（正規表現による数字と単位の検索）
+        num_match = re.search(r'(\d+)\s*[個处家条座名大]', last_content)
+        if not num_match:
+            num_match = re.search(r'推薦\s*(\d+)', last_content)
+            
+        if num_match:
+            target_count = min(int(num_match.group(1)), 20)
+        else:
+            # 漢数字の処理（中国語入力への後方互換性維持のためキーは維持）
+            cn_nums = {'一':1, '两':2, '二':2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9, '十':10, '十五':15, '二十':20}
+            for cn, val in cn_nums.items():
+                if f"{cn}个" in last_content or f"{cn}处" in last_content or f"推薦{cn}" in last_content:
+                    target_count = val
+                    break
         
-        # 使用GraphRAG增强对话
+        extracted = client.extract_keywords(messages)
+        if isinstance(extracted, str):
+            extracted = [extracted]
+        
+        # 検索ノイズとなるストップワードをフィルタリング
+        stop_words = {'景点', '地方', '推荐', '旅游', '游玩', '打卡', '空字符串', '日本', '哪里', '好玩'}
+        original_keywords = [k for k in (extracted or []) if k and k not in stop_words]
+        
+        user_preferences = ""
+        top_tags = []
+        
+        # ユーザー履歴に基づくパーソナライズ
+        if user_id and str(user_id).strip() != '':
+            user_id = int(user_id)
+            history_items = get_user_history_items(user_id, limit=20)
+            
+            if history_items:
+                all_tags = []
+                for item in history_items:
+                    if item.get('tags'):
+                        all_tags.extend(item['tags'])
+                
+                if all_tags:
+                    from collections import Counter
+                    top_tags = [tag for tag, count in Counter(all_tags).most_common(2)]
+                    user_preferences = f"【現在のユーザーの履歴に基づく好み】: {', '.join(top_tags)}"
+        
+        # グラフコンテキストの構築
+        graph_context, search_info = _build_graph_context_with_info(
+            original_keywords=original_keywords, 
+            top_tags=top_tags,
+            user_preferences=user_preferences, 
+            target_count=target_count,
+            user_id=user_id
+        )
+        
+        search_info['original_keywords'] = original_keywords
+        search_info['injected_tags'] = top_tags
+        
+        # RAGコンテキストを注入してLLMを実行
         response = client.chat_with_graph_rag(messages, graph_context)
         
         return success({
@@ -340,69 +311,153 @@ def chat_with_graph_rag():
         })
     
     except Exception as e:
-        return error(f'GraphRAG对话失败: {str(e)}')
+        return error(f'GraphRAG対話に失敗しました: {str(e)}')
 
-
-def _build_graph_context_with_info(keywords: List[str]) -> tuple[str, dict]:
-    """构建图数据库上下文信息并返回搜索详情"""
+def _build_graph_context_with_info(original_keywords: List[str], top_tags: List[str], user_preferences: str = "", target_count: int = 5, user_id: int = None) -> tuple[str, dict]:
+    """グラフデータベースからコンテキスト情報を構築し、検索詳細を返す"""
     context_parts = []
+    
     search_info = {
-        'keywords': keywords,
-        'found_items': 0,
+        'keywords': original_keywords,                                  
+        'user_preferences': user_preferences,                  
+        'found_items_count': 0,
         'search_status': 'no_keywords',
-        'message': ''
+        'message': '',
+        'raw_graph_data': [],                                  
+        'final_injected_context': ''                            
     }
     
-    if keywords:
-        related_items = neo4j_client.search_related_items(keywords, limit=8)
-        search_info['found_items'] = len(related_items) if related_items else 0
+    # ユーザーが既にお気に入りに登録しているスポットを除外または低優先にするため取得
+    favorited_item_ids = set()
+    if user_id:
+        try:
+            fav_query = "MATCH (u:User {id: $userId})-[r:FAVORITED]->(i:Item) RETURN i.id AS itemId"
+            fav_results = neo4j_client.execute_query(fav_query, {"userId": int(user_id)})
+            if fav_results:
+                favorited_item_ids = {str(res.get('itemId')) for res in fav_results if res.get('itemId') is not None}
+        except Exception as e:
+            print(f"お気に入り記録の照会に失敗しました: {e}")
+
+    # ==========================================
+    # 🚀 分離型グラフ検索戦略（AND検索による結果ゼロを回避）
+    # ==========================================
+    related_items = []
+    
+    # 戦略1：明確な検索ワードがある場合、それを強条件として優先（現在の意図を反映）
+    if original_keywords:
+        related_items = neo4j_client.search_related_items(original_keywords, limit=50)
         
-        if related_items:
-            # === 场景 1: 图谱中查到了数据（但需要 AI 自行判断是否真的相关） ===
-            search_info['search_status'] = 'found'
-            search_info['message'] = f"找到 {len(related_items)} 个相关景点"
-            
-            context_parts.append("### 相关景点信息(来自系统本地数据库) ###")
-            for i, item in enumerate(related_items, 1):
-                context_parts.append(f"{i}. {item['title']}")
-                context_parts.append(f"   类别: {item.get('categoryName', '未分类')}")
-                context_parts.append(f"   描述: {item.get('description', '暂无描述')[:100]}...")
-                if item.get('tags'):
-                    context_parts.append(f"   标签: {', '.join(item['tags'][:5])}")
-                context_parts.append("")
+    # 戦略2：検索ワードがない、または結果が得られない場合、履歴の好みから個別に取得
+    if (not original_keywords or not related_items) and top_tags:
+        for tag in top_tags:
+            tag_items = neo4j_client.search_related_items([tag], limit=30)
+            if tag_items:
+                related_items.extend(tag_items)
                 
-            # 【终极防呆修改】：赋予大模型“自主判断相关性”的权力，避免强行推荐错误地点
-            context_parts.append("【核心回复指令】：请你首先评估上方提供的【相关景点信息】是否与用户提问的真实意图（如特定的城市、国家、主题）高度匹配。")
-            context_parts.append("然后，请严格按照以下两种情况之一进行回答：")
-            context_parts.append("情况A（如果高度匹配）：")
-            context_parts.append("  第一段：你必须说“本系统为您检索到以下本地景点：”，然后介绍高度匹配的本地景点。")
-            context_parts.append("  第二段：你必须说“此外，根据我的通用知识，我还为您推荐：”，补充几个不在列表中的相关景点。")
-            context_parts.append("情况B（如果不匹配，例如用户问巴黎，但系统提供的是日本或毫不相干的景点）：")
-            context_parts.append("  请直接无视系统提供的错误信息，并告诉用户：“抱歉，本系统中暂时没有查到关于该景点的收录记录。不过根据我的知识库，我可以为您介绍：” 然后使用你的通用知识库进行解答。")
+    # 戦略3：フォールバック：何も見つからない場合、一般的な観光ワードで補完
+    if not related_items:
+        related_items = neo4j_client.search_related_items(["日本", "風景", "人気"], limit=30)
+
+    # 重複排除処理
+    unique_items = {}
+    if related_items:
+        for item in related_items:
+            item_id = str(item.get('id'))
+            if item_id and item_id not in unique_items:
+                unique_items[item_id] = item
+        candidate_pool = list(unique_items.values())
+    else:
+        candidate_pool = []
+    
+    search_info['found_items_count'] = len(candidate_pool)
+
+    if user_preferences:
+        context_parts.append("### 💡 ユーザープロファイルとパーソナライズされた好み ###")
+        context_parts.append(user_preferences)
+        context_parts.append("【推薦の原則】: 今回の明示的なリクエストを最優先し、歴史的嗜好をプラスアルファの加点要素として考慮しています。\n")
+    
+    if candidate_pool:
+        valid_original_kws = [k.lower() for k in original_keywords if k.strip()]
+        valid_top_tags = [t.lower() for t in top_tags if t.strip()]
+        
+        for item in candidate_pool:
+            item_text = f"{item.get('title','')} {item.get('description','')} {item.get('categoryName','')} {' '.join(item.get('tags',[]))}".lower()
             
-        else:
-            # === 场景 2: 图谱中没找到 ===
-            search_info['search_status'] = 'not_found_fallback'
-            search_info['message'] = f"库内未收录 {', '.join(keywords)}，切换为通用知识回答"
+            # 1. コア意図のスコアリング
+            current_score = 0
+            for kw in valid_original_kws:
+                if kw in item_text:
+                    current_score += 100
+                    
+            # 2. 補助的な好みのスコアリング
+            pref_score = 0
+            for tag in valid_top_tags:
+                if tag in item_text:
+                    pref_score += 15
             
-            context_parts.append("### 系统提示 ###")
-            context_parts.append(f"注意：系统数据库中暂时没有关于关键词 [{', '.join(keywords)}] 的具体景点记录。")
+            base_score = item.get('relevanceScore', 0)
             
-            # 【核心修改】：强制大模型承认系统没查到，然后用通用知识回答
-            context_parts.append("【核心回复指令】：请你严格按照以下结构回答用户：")
-            context_parts.append("开头第一句，你必须明确说明：“抱歉，本系统中暂时没有查到关于该景点的收录记录。不过根据我的知识库，我可以为您介绍：”")
-            context_parts.append("说完这句话后，请直接使用你的通用知识库（General Knowledge）详细回答用户的问题。")
+            # 3. キーワード不一致のフィルタリング
+            if valid_original_kws and current_score == 0:
+                final_weight = 0.1
+            else:
+                final_weight = current_score + pref_score + base_score
+                
+            # 4. 既にお気に入り済みのスポットは優先度を下げる
+            if str(item.get('id')) in favorited_item_ids:
+                final_weight = final_weight * 0.1
+                
+            item['custom_weight'] = final_weight
+        
+        # 加重サンプリングによる選出
+        sample_size = min(target_count, len(candidate_pool))
+        selected_items = []
+        
+        for _ in range(sample_size):
+            if not candidate_pool:
+                break
+            weights = [max(item.get('custom_weight', 0.1), 0.1) for item in candidate_pool]
+            chosen_item = random.choices(candidate_pool, weights=weights, k=1)[0]
+            selected_items.append(chosen_item)
+            candidate_pool.remove(chosen_item)
+            
+        search_info['raw_graph_data'] = selected_items
+        search_info['search_status'] = 'found'
+        search_info['message'] = f"意図加重アルゴリズムに基づき、{search_info['found_items_count']} 件がヒット。その中から {len(selected_items)} 件を厳選。"
+        
+        context_parts.append("### 関連観光スポット情報 (ローカルナレッジグラフより) ###")
+        for i, item in enumerate(selected_items, 1):
+            context_parts.append(f"{i}. {item['title']}")
+            context_parts.append(f"   カテゴリ: {item.get('categoryName', '未分類')}")
+            context_parts.append(f"   説明: {item.get('description', '説明なし')[:100]}...")
+            if item.get('tags'):
+                context_parts.append(f"   タグ: {', '.join(item['tags'][:5])}")
             context_parts.append("")
             
+        context_parts.append("【出力指示】（厳守すること）:")
+        context_parts.append(f"1. 【正確な件数の報告】: システムは正確に {len(selected_items)} 件のスポットを検索しました。回答の冒頭で「{len(selected_items)} 件のスポットを厳選しました」と明記し、リストにあるものをすべて紹介してください。")
+        context_parts.append(f"2. 【過度な拡張の禁止】: ユーザーの希望件数は {target_count} 件です。提供されたリストの件数が希望件数以上であれば、自分の知識から新しいスポットを補完してはいけません。")
+        context_parts.append("3. 【パーソナライズ紹介】: リストのスポットを紹介する際は、今回のリクエストに対する魅力を重点的に伝え、好みに無理やり結びつけないようにしてください。")
+        context_parts.append(f"4. 【不足時のみ補完】: 提供リストが {target_count} 件に満たない場合のみ、自身の知識で不足分を補い、それを【AIによる追加推薦】として明記してください。")
+        
     else:
-        # === 场景 3: 没提取到关键词 ===
-        search_info['message'] = "未能从对话中提取到有效的旅游关键词"
-        context_parts.append("用户似乎没有提到具体的景点或旅游需求，请自然地引导用户提供更多信息。")
-    
-    if keywords:
-        context_parts.append("### 本次搜索关键词 ###")
-        context_parts.append(f"提取的关键词: {', '.join(keywords)}")
+        search_info['search_status'] = 'not_found_fallback'
+        search_info['message'] = "グラフデータベースに関連記録が見つかりませんでした"
+        
+        context_parts.append("### システム通知 ###")
+        context_parts.append("注意：システムのナレッジグラフに該当する記録が見つかりませんでした。")
+        
+        context_parts.append("【指示】:")
+        context_parts.append("まず丁寧に「申し訳ございませんが、システムのナレッジグラフにはご要望に合致する記録がありませんでした」と伝えてください。")
+        context_parts.append("その上で、自身の一般的な知識（General Knowledge）を活用して、ユーザーのニーズに合う最適なスポットを推薦してください。")
+        context_parts.append("")
+        
+    if original_keywords:
+        context_parts.append("### 今回の検索キーワード ###")
+        context_parts.append(f"抽出された検索意図: {', '.join(original_keywords)}")
         context_parts.append("")
     
     context = "\n".join(context_parts)
+    search_info['final_injected_context'] = context
+    
     return context, search_info

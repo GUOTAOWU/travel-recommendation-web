@@ -1,21 +1,21 @@
-// 分页查询参数
+// ページング検索パラメータ
 export interface PageDTO {
-  current: number // 当前页码
-  size: number // 每页大小
+  current: number // 現在のページ番号
+  size: number // 1ページあたりの表示件数
 }
 
-// 分页返回结果
+// ページング返却結果
 export interface PageVO<T> {
-  records: T[] // 数据列表
-  total: number // 总条数
-  size: number // 每页大小
-  current: number // 当前页码
-  pages: number // 总页数
+  records: T[] // データリスト
+  total: number // 総件数
+  size: number // 1ページあたりの表示件数
+  current: number // 現在のページ番号
+  pages: number // 総ページ数
 }
 
-// 通用响应结果
+// 共通レスポンス結果
 export interface Result<T> {
-  code: number // 状态码
-  msg: string // 消息
-  data: T // 数据
+  code: number // ステータスコード
+  msg: string // メッセージ
+  data: T // データ
 }

@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * 类别服务实现类
+ * カテゴリサービス実装クラス
  */
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -41,14 +41,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long add(CategoryAddDTO dto) {
-        // 检查名称是否已存在
+        // 名前の重複チェック
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Category::getName, dto.getName());
         if (categoryMapper.selectCount(queryWrapper) > 0) {
-            throw new BusinessException("类别名称已存在");
+            throw new BusinessException("カテゴリ名が既に存在します");
         }
 
-        // 创建实体并保存
+        // エンティティを作成して保存
         Category entity = new Category();
         BeanUtils.copyProperties(dto, entity);
         categoryMapper.insert(entity);
@@ -59,34 +59,34 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(CategoryUpdateDTO dto) {
-        // 检查ID是否存在
+        // IDの存在チェック
         Category entity = categoryMapper.selectById(dto.getId());
         if (entity == null) {
-            throw new BusinessException("类别不存在");
+            throw new BusinessException("カテゴリが存在しません");
         }
 
-        // 如果更新名称，检查是否与其他类别重复
+        // 名称を更新する場合、他のカテゴリと重複していないかチェック
         if (StringUtils.hasText(dto.getName()) && !dto.getName().equals(entity.getName())) {
             LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Category::getName, dto.getName());
             queryWrapper.ne(Category::getId, dto.getId());
             if (categoryMapper.selectCount(queryWrapper) > 0) {
-                throw new BusinessException("类别名称已存在");
+                throw new BusinessException("カテゴリ名が既に存在します");
             }
         }
 
-        // 如果更新图标，删除旧的图标文件
+        // アイコンを更新する場合、古いアイコンファイルを削除
         if (dto.getIconObjectKey() != null && !dto.getIconObjectKey().equals(entity.getIconObjectKey()) && 
             StringUtils.hasText(entity.getIconBucket()) && StringUtils.hasText(entity.getIconObjectKey())) {
             try {
                 fileClient.delete(entity.getIconBucket(), entity.getIconObjectKey());
             } catch (Exception e) {
-                // 文件删除失败，仅记录不影响后续操作
-                System.err.println("删除旧的类别图标文件失败: " + e.getMessage());
+                // ファイル削除失敗。ログのみ記録し、後続の処理には影響させない
+                System.err.println("旧カテゴリのアイコンファイル削除に失敗しました: " + e.getMessage());
             }
         }
 
-        // 更新属性
+        // プロパティの更新
         if (StringUtils.hasText(dto.getName())) {
             entity.setName(dto.getName());
         }
@@ -106,30 +106,30 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        // 检查ID是否存在
+        // IDの存在チェック
         Category entity = categoryMapper.selectById(id);
         if (entity == null) {
-            throw new BusinessException("类别不存在");
+            throw new BusinessException("カテゴリが存在しません");
         }
 
-        // 检查是否有关联的物品
+        // 関連するアイテムの有無をチェック
         LambdaQueryWrapper<com.gjq.entity.Item> itemQueryWrapper = new LambdaQueryWrapper<>();
         itemQueryWrapper.eq(com.gjq.entity.Item::getCategoryId, id);
         if (itemMapper.selectCount(itemQueryWrapper) > 0) {
-            throw new BusinessException("该类别下有关联的物品，无法删除");
+            throw new BusinessException("このカテゴリに関連付けられたアイテムが存在するため、削除できません");
         }
 
-        // 删除图标文件
+        // アイコンファイルを削除
         if (StringUtils.hasText(entity.getIconBucket()) && StringUtils.hasText(entity.getIconObjectKey())) {
             try {
                 fileClient.delete(entity.getIconBucket(), entity.getIconObjectKey());
             } catch (Exception e) {
-                // 文件删除失败，仅记录不影响后续操作
-                System.err.println("删除类别图标文件失败: " + e.getMessage());
+                // ファイル削除失敗。ログのみ記録し、後続の処理には影響させない
+                System.err.println("カテゴリのアイコンファイル削除に失敗しました: " + e.getMessage());
             }
         }
 
-        // 删除类别
+        // カテゴリを削除
         categoryMapper.deleteById(id);
     }
 
@@ -137,7 +137,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryVO getById(Long id) {
         Category entity = categoryMapper.selectById(id);
         if (entity == null) {
-            throw new BusinessException("类别不存在");
+            throw new BusinessException("カテゴリが存在しません");
         }
         return toVO(entity);
     }
@@ -152,7 +152,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Page<CategoryVO> page(CategoryQueryDTO dto) {
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         
-        // 添加查询条件
+        // 検索条件の追加
         if (StringUtils.hasText(dto.getName())) {
             queryWrapper.like(Category::getName, dto.getName());
         }
@@ -160,14 +160,14 @@ public class CategoryServiceImpl implements CategoryService {
             queryWrapper.like(Category::getDescription, dto.getDescription());
         }
         
-        // 按创建时间降序排序
+        // 作成日時の降順でソート
         queryWrapper.orderByDesc(Category::getCreateTime);
         
-        // 分页查询
+        // ページング検索
         Page<Category> page = new Page<>(dto.getCurrent(), dto.getSize());
         page = categoryMapper.selectPage(page, queryWrapper);
         
-        // 转换为VO
+        // VOへ変換
         Page<CategoryVO> voPage = new Page<>();
         BeanUtils.copyProperties(page, voPage, "records");
         
@@ -189,11 +189,11 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryVO vo = new CategoryVO();
         BeanUtils.copyProperties(entity, vo);
         
-        // 设置图标URL
+        // アイコンURLの設定
         if (StringUtils.hasText(entity.getIconBucket()) && StringUtils.hasText(entity.getIconObjectKey())) {
             vo.setIconUrl(fileClient.getFileUrl(entity.getIconBucket(), entity.getIconObjectKey()));
         }
         
         return vo;
     }
-} 
+}

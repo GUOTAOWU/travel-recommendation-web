@@ -10,69 +10,69 @@ import com.gjq.vo.item.ItemVO;
 import java.util.List;
 
 /**
- * 物品服务接口
+ * アイテムサービスインターフェース
  */
 public interface ItemService {
 
     /**
-     * 添加物品
+     * アイテムを追加します
      *
-     * @param dto 添加物品DTO
-     * @return 物品ID
+     * @param dto アイテム追加DTO
+     * @return アイテムID
      */
     Long add(ItemAddDTO dto);
 
     /**
-     * 更新物品
+     * アイテムを更新します
      *
-     * @param dto 更新物品DTO
+     * @param dto アイテム更新DTO
      */
     void update(ItemUpdateDTO dto);
 
     /**
-     * 删除物品
+     * アイテムを削除します
      *
-     * @param id 物品ID
+     * @param id アイテムID
      */
     void delete(Long id);
 
     /**
-     * 根据ID获取物品
+     * IDに基づいてアイテムを取得します
      *
-     * @param id 物品ID
-     * @return 物品视图对象
+     * @param id アイテムID
+     * @return アイテムビューオブジェクト(VO)
      */
     ItemVO getById(Long id);
 
     /**
-     * 分页查询物品
+     * アイテムをページング検索します
      *
-     * @param dto 查询物品DTO
-     * @return 分页物品视图对象
+     * @param dto アイテム検索DTO
+     * @return ページングされたアイテムビューオブジェクト(VO)
      */
     Page<ItemVO> page(ItemQueryDTO dto);
 
     /**
-     * 根据类别ID获取物品列表
+     * カテゴリIDに基づいてアイテムリストを取得します
      *
-     * @param categoryId 类别ID
-     * @return 物品视图对象列表
+     * @param categoryId カテゴリID
+     * @return アイテムビューオブジェクト(VO)のリスト
      */
     List<ItemVO> listByCategoryId(Long categoryId);
 
     /**
-     * 根据标签获取物品列表
+     * タグに基づいてアイテムリストを取得します
      *
-     * @param tag 标签
-     * @return 物品视图对象列表
+     * @param tag タグ
+     * @return アイテムビューオブジェクト(VO)のリスト
      */
     List<ItemVO> listByTag(String tag);
 
     /**
-     * 实体转换为视图对象
+     * エンティティをビューオブジェクト(VO)に変換します
      *
-     * @param entity 物品实体
-     * @return 物品视图对象
+     * @param entity アイテムエンティティ
+     * @return アイテムビューオブジェクト(VO)
      */
     ItemVO toVO(Item entity);
-} 
+}

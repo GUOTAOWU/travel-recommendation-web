@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Web MVC配置
+ * Web MVC 設定
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -20,12 +20,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(tokenInterceptor)
-                .addPathPatterns("/**")  // 拦截所有请求
-                .excludePathPatterns(    // 排除不需要拦截的路径
-                        "/user/login",    // 登录
-                        "/user/register", // 注册
+                .addPathPatterns("/**")  // すべてのリクエストをインターセプトする
+                .excludePathPatterns(    // インターセプトを除外するパスを指定
+                        "/user/login",    // ログイン
+                        "/user/register", // 新規登録
                         "/swagger-ui/**", // Swagger UI
                         "/v3/api-docs/**" // OpenAPI
                 );
     }
-} 
+}

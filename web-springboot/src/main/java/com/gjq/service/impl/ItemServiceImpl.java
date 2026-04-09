@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 物品服务实现类
+ * アイテム（スポット）サービス実装クラス
  */
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -50,13 +50,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long add(ItemAddDTO dto) {
-        // 检查类别是否存在
+        // カテゴリの存在チェック
         Category category = categoryMapper.selectById(dto.getCategoryId());
         if (category == null) {
-            throw new BusinessException("类别不存在");
+            throw new BusinessException("カテゴリが存在しません");
         }
 
-        // 创建实体并保存
+        // エンティティを作成して保存
         Item entity = new Item();
         BeanUtils.copyProperties(dto, entity);
         itemMapper.insert(entity);
@@ -67,43 +67,43 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(ItemUpdateDTO dto) {
-        // 检查ID是否存在
+        // IDの存在チェック
         Item entity = itemMapper.selectById(dto.getId());
         if (entity == null) {
-            throw new BusinessException("物品不存在");
+            throw new BusinessException("アイテムが存在しません");
         }
 
-        // 如果更新类别ID，检查类别是否存在
+        // カテゴリIDを更新する場合、カテゴリの存在チェック
         if (dto.getCategoryId() != null && !dto.getCategoryId().equals(entity.getCategoryId())) {
             Category category = categoryMapper.selectById(dto.getCategoryId());
             if (category == null) {
-                throw new BusinessException("类别不存在");
+                throw new BusinessException("カテゴリが存在しません");
             }
         }
 
-        // 如果更新封面，删除旧的封面文件
+        // カバー画像を更新する場合、古いファイルを削除
         if (dto.getCoverObjectKey() != null && !dto.getCoverObjectKey().equals(entity.getCoverObjectKey()) && 
             StringUtils.hasText(entity.getCoverBucket()) && StringUtils.hasText(entity.getCoverObjectKey())) {
             try {
                 fileClient.delete(entity.getCoverBucket(), entity.getCoverObjectKey());
             } catch (Exception e) {
-                // 文件删除失败，仅记录不影响后续操作
-                System.err.println("删除旧的物品封面文件失败: " + e.getMessage());
+                // ファイル削除失敗。ログのみ記録し、後続の処理には影響させない
+                System.err.println("旧アイテムのカバーファイル削除に失敗しました: " + e.getMessage());
             }
         }
 
-        // 如果更新文件，删除旧的文件
+        // 添付ファイルを更新する場合、古いファイルを削除
         if (dto.getFileObjectKey() != null && !dto.getFileObjectKey().equals(entity.getFileObjectKey()) && 
             StringUtils.hasText(entity.getFileBucket()) && StringUtils.hasText(entity.getFileObjectKey())) {
             try {
                 fileClient.delete(entity.getFileBucket(), entity.getFileObjectKey());
             } catch (Exception e) {
-                // 文件删除失败，仅记录不影响后续操作
-                System.err.println("删除旧的物品文件失败: " + e.getMessage());
+                // ファイル削除失敗。ログのみ記録し、後続の処理には影響させない
+                System.err.println("旧アイテムのファイル削除に失敗しました: " + e.getMessage());
             }
         }
 
-        // 更新属性
+        // プロパティの更新
         if (StringUtils.hasText(dto.getTitle())) {
             entity.setTitle(dto.getTitle());
         }
@@ -138,33 +138,31 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        // 检查ID是否存在
+        // IDの存在チェック
         Item entity = itemMapper.selectById(id);
         if (entity == null) {
-            throw new BusinessException("物品不存在");
+            throw new BusinessException("アイテムが存在しません");
         }
 
-        // 删除封面文件
+        // カバー画像を削除
         if (StringUtils.hasText(entity.getCoverBucket()) && StringUtils.hasText(entity.getCoverObjectKey())) {
             try {
                 fileClient.delete(entity.getCoverBucket(), entity.getCoverObjectKey());
             } catch (Exception e) {
-                // 文件删除失败，仅记录不影响后续操作
-                System.err.println("删除物品封面文件失败: " + e.getMessage());
+                System.err.println("アイテムのカバーファイル削除に失敗しました: " + e.getMessage());
             }
         }
 
-        // 删除相关文件
+        // 関連ファイルを削除
         if (StringUtils.hasText(entity.getFileBucket()) && StringUtils.hasText(entity.getFileObjectKey())) {
             try {
                 fileClient.delete(entity.getFileBucket(), entity.getFileObjectKey());
             } catch (Exception e) {
-                // 文件删除失败，仅记录不影响后续操作
-                System.err.println("删除物品相关文件失败: " + e.getMessage());
+                System.err.println("アイテムの関連ファイル削除に失敗しました: " + e.getMessage());
             }
         }
 
-        // 删除物品
+        // アイテムを削除
         itemMapper.deleteById(id);
     }
 
@@ -172,7 +170,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemVO getById(Long id) {
         Item entity = itemMapper.selectById(id);
         if (entity == null) {
-            throw new BusinessException("物品不存在");
+            throw new BusinessException("アイテムが存在しません");
         }
         return toVO(entity);
     }
@@ -181,7 +179,7 @@ public class ItemServiceImpl implements ItemService {
     public Page<ItemVO> page(ItemQueryDTO dto) {
         LambdaQueryWrapper<Item> queryWrapper = new LambdaQueryWrapper<>();
         
-        // 添加查询条件
+        // 検索条件の追加
         if (StringUtils.hasText(dto.getTitle())) {
             queryWrapper.like(Item::getTitle, dto.getTitle());
         }
@@ -192,17 +190,16 @@ public class ItemServiceImpl implements ItemService {
             queryWrapper.eq(Item::getCategoryId, dto.getCategoryId());
         }
         if (StringUtils.hasText(dto.getTag())) {
-            // 处理标签搜索 - 支持多个标签
+            // タグ検索の処理 - 複数タグに対応
             String tagQuery = dto.getTag().trim();
             
-            // 如果包含逗号，说明是多个标签
+            // カンマが含まれる場合、複数タグとして処理
             if (tagQuery.contains(",")) {
-                // 分割多个标签
                 String[] tags = tagQuery.split(",");
                 for (String tag : tags) {
                     if (StringUtils.hasText(tag)) {
-                        // 确保每个标签前后都有逗号或在开头结尾，防止部分匹配
-                        // 例如: 标签为"科学,技术"，搜索"科"应该能匹配，但搜索"学技"不应该匹配
+                        // 部分一致を防ぐため、カンマの有無を考慮したLIKE検索を実施
+                        // 例: "科学,技術" というタグに対し、"科"はヒットするが "学技" はヒットしないように制御
                         queryWrapper.and(q -> q.like(Item::getTags, "," + tag.trim() + ",")
                                 .or()
                                 .like(Item::getTags, tag.trim() + ",")
@@ -213,8 +210,7 @@ public class ItemServiceImpl implements ItemService {
                     }
                 }
             } else {
-                // 单个标签搜索
-                // 确保标签前后都有逗号或在开头结尾，防止部分匹配
+                // 単一タグ検索
                 queryWrapper.and(q -> q.like(Item::getTags, "," + tagQuery + ",")
                         .or()
                         .like(Item::getTags, tagQuery + ",")
@@ -225,15 +221,15 @@ public class ItemServiceImpl implements ItemService {
             }
         }
         
-        // 查询创建者真实姓名
+        // 作成者の氏名で検索
         if (StringUtils.hasText(dto.getUserRealName())) {
-            // 查询符合真实姓名条件的用户ID列表
+            // 氏名条件に一致するユーザーIDリストを取得
             LambdaQueryWrapper<User> userQuery = new LambdaQueryWrapper<>();
             userQuery.like(User::getRealName, dto.getUserRealName());
             List<User> users = userMapper.selectList(userQuery);
             List<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
             
-            // 如果没有找到匹配的用户，添加一个不可能的条件确保查询结果为空
+            // 一致するユーザーがいない場合、空の結果を保証するために不可能な条件を追加
             if (userIds.isEmpty()) {
                 queryWrapper.eq(Item::getUserId, -1L);
             } else {
@@ -241,14 +237,14 @@ public class ItemServiceImpl implements ItemService {
             }
         }
         
-        // 按创建时间降序排序
+        // 作成日時の降順でソート
         queryWrapper.orderByDesc(Item::getCreateTime);
         
-        // 分页查询
+        // ページング検索
         Page<Item> page = new Page<>(dto.getCurrent(), dto.getSize());
         page = itemMapper.selectPage(page, queryWrapper);
         
-        // 转换为VO
+        // VOへ変換
         Page<ItemVO> voPage = new Page<>();
         BeanUtils.copyProperties(page, voPage, "records");
         
@@ -294,28 +290,28 @@ public class ItemServiceImpl implements ItemService {
         ItemVO vo = new ItemVO();
         BeanUtils.copyProperties(entity, vo);
         
-        // 设置封面URL
+        // カバー画像URLの設定
         if (StringUtils.hasText(entity.getCoverBucket()) && StringUtils.hasText(entity.getCoverObjectKey())) {
             vo.setCoverUrl(fileClient.getFileUrl(entity.getCoverBucket(), entity.getCoverObjectKey()));
         }
         
-        // 设置文件URL
+        // ファイルURLの設定
         if (StringUtils.hasText(entity.getFileBucket()) && StringUtils.hasText(entity.getFileObjectKey())) {
             vo.setFileUrl(fileClient.getFileUrl(entity.getFileBucket(), entity.getFileObjectKey()));
         }
         
-        // 设置标签列表
+        // タグリストの設定
         if (StringUtils.hasText(entity.getTags())) {
             vo.setTagList(entity.getTags().split(","));
         }
         
-        // 设置类别信息
+        // カテゴリ情報の設定
         Category category = categoryMapper.selectById(entity.getCategoryId());
         if (category != null) {
             vo.setCategory(categoryService.toVO(category));
         }
         
-        // 设置发布者真实姓名
+        // 投稿者の氏名を設定
         if (entity.getUserId() != null) {
             User user = userMapper.selectById(entity.getUserId());
             if (user != null) {
@@ -325,4 +321,4 @@ public class ItemServiceImpl implements ItemService {
         
         return vo;
     }
-} 
+}

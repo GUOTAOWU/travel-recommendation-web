@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
- * JWT工具类
+ * JWTユーティリティクラス
  */
 @Component
 public class JwtUtils {
@@ -30,10 +30,10 @@ public class JwtUtils {
     }
 
     /**
-     * 生成token
+     * トークンを生成します
      *
-     * @param userId 用户ID
-     * @return token
+     * @param userId ユーザーID
+     * @return 生成されたトークン
      */
     public static String generateToken(Long userId) {
         Date now = new Date();
@@ -50,10 +50,10 @@ public class JwtUtils {
     }
 
     /**
-     * 从token中获取用户ID
+     * トークンからユーザーIDを取得します
      *
-     * @param token token
-     * @return 用户ID
+     * @param token トークン
+     * @return ユーザーID
      */
     public static Long getUserId(String token) {
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -68,10 +68,10 @@ public class JwtUtils {
     }
 
     /**
-     * 验证token是否有效
+     * トークンが有効かどうかを検証します
      *
-     * @param token token
-     * @return 是否有效
+     * @param token トークン
+     * @return 有効な場合はtrue、そうでない場合はfalse
      */
     public static boolean validateToken(String token) {
         try {
@@ -82,7 +82,8 @@ public class JwtUtils {
                     .parseSignedClaims(token);
             return true;
         } catch (Exception e) {
+            // 検証に失敗した場合は無効とみなす
             return false;
         }
     }
-} 
+}

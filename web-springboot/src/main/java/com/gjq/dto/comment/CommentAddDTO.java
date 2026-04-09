@@ -6,34 +6,34 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 评论添加DTO
+ * コメント追加DTO
  */
 @Data
 public class CommentAddDTO {
     /**
-     * 物品ID
+     * アイテムID
      */
-    @NotNull(message = "物品ID不能为空")
+    @NotNull(message = "アイテムIDは必須です")
     private Long itemId;
 
     /**
-     * 评论内容
+     * コメント内容
      */
-    @NotBlank(message = "评论内容不能为空")
+    @NotBlank(message = "コメント内容は必須です")
     private String content;
 
     /**
-     * 父评论ID（为null表示是顶级评论，否则表示回复）
+     * 親コメントID（nullの場合はトップレベルコメント、それ以外は返信を意味します）
      */
     private Long parentId;
     
     /**
-     * 被回复的评论ID
+     * 返信先のコメントID
      */
     private Long replyToCommentId;
     
     /**
-     * 被回复的用户ID
+     * 返信先のユーザーID
      */
     private Long replyToUserId;
-} 
+}

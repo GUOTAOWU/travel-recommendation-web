@@ -17,9 +17,9 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 /**
- * 用户行为控制器
+ * ユーザー行動コントローラー
  */
-@Tag(name = "用户行为", description = "用户行为相关接口")
+@Tag(name = "ユーザー行動", description = "ユーザー行動関連インターフェース")
 @RestController
 @RequestMapping("/user-action")
 public class UserActionController {
@@ -28,12 +28,12 @@ public class UserActionController {
     private UserActionService userActionService;
 
     /**
-     * 添加用户行为记录
+     * ユーザー行動ログを追加
      *
-     * @param dto 用户行为DTO
-     * @return 是否成功
+     * @param dto ユーザー行動DTO
+     * @return 成功したかどうか
      */
-    @Operation(summary = "添加用户行为记录", description = "添加用户浏览/预约记录")
+    @Operation(summary = "ユーザー行動ログを追加", description = "ユーザーの閲覧/予約ログを追加します")
     @PostMapping
     public Result<Boolean> addUserAction(@RequestBody @Valid UserActionDTO dto) {
         Long userId = SecurityUtils.getUserId();
@@ -42,32 +42,32 @@ public class UserActionController {
     }
 
     /**
-     * 分页查询当前用户的行为记录
+     * 現在のユーザーの行動ログをページング検索
      *
-     * @param dto 查询条件
-     * @return 分页结果
+     * @param dto 検索条件
+     * @return ページング結果
      */
-    @Operation(summary = "分页查询当前用户的行为记录", description = "分页查询当前用户的浏览/预约记录")
+    @Operation(summary = "現在のユーザーの行動ログをページング検索", description = "現在のユーザーの閲覧/予約ログをページング検索します")
     @GetMapping("/page")
     public Result<Page<UserActionVO>> pageMyActions(UserActionQueryDTO dto) {
-        // 设置当前用户ID
+        // 現在のユーザーIDを設定
         dto.setUserId(SecurityUtils.getUserId());
         Page<UserActionVO> page = userActionService.pageUserActions(dto);
         return Result.success(page);
     }
 
     /**
-     * 分页查询所有用户的行为记录（管理员接口）
+     * 全ユーザーの行動ログをページング検索（管理者用インターフェース）
      *
-     * @param dto 查询条件
-     * @return 分页结果
+     * @param dto 検索条件
+     * @return ページング結果
      */
-    @Operation(summary = "分页查询所有用户的行为记录", description = "分页查询所有用户的浏览/预约记录（管理员接口）")
+    @Operation(summary = "全ユーザーの行動ログをページング検索", description = "全ユーザーの閲覧/予約ログをページング検索します（管理者用）")
     @GetMapping("/admin/page")
     public Result<Page<UserActionVO>> pageAllActions(UserActionQueryDTO dto) {
-        // 检查权限
+        // 権限チェック
         if (!SecurityUtils.isAdmin()) {
-            return Result.error("权限不足");
+            return Result.error("権限が不足しています");
         }
         
         Page<UserActionVO> page = userActionService.pageUserActions(dto);
@@ -75,18 +75,18 @@ public class UserActionController {
     }
 
     /**
-     * 批量删除用户行为记录（管理员接口）
+     * ユーザー行動ログを一括削除（管理者用インターフェース）
      *
-     * @param ids 要删除的记录ID列表
-     * @return 是否成功
+     * @param ids 削除対象のログIDリスト
+     * @return 成功したかどうか
      */
-    @Operation(summary = "批量删除用户行为记录", description = "批量删除用户行为记录（管理员接口）")
+    @Operation(summary = "ユーザー行動ログを一括削除", description = "ユーザー行動ログを一括削除します（管理者用）")
     @DeleteMapping("/batch")
-    public Result<Boolean> batchDeleteActions(@RequestBody @Valid @Parameter(description = "记录ID列表") 
+    public Result<Boolean> batchDeleteActions(@RequestBody @Valid @Parameter(description = "ログIDリスト") 
                                              List<Long> ids) {
-        // 检查权限
+        // 権限チェック
         if (!SecurityUtils.isAdmin()) {
-            return Result.error("权限不足");
+            return Result.error("権限が不足しています");
         }
         
         boolean success = userActionService.batchDeleteActions(ids);
@@ -94,14 +94,14 @@ public class UserActionController {
     }
     
     /**
-     * 批量删除当前用户的行为记录
+     * 現在のユーザーの行動ログを一括削除
      *
-     * @param ids 要删除的记录ID列表
-     * @return 是否成功
+     * @param ids 削除対象のログIDリスト
+     * @return 成功したかどうか
      */
-    @Operation(summary = "批量删除当前用户的行为记录", description = "批量删除当前用户的行为记录")
+    @Operation(summary = "現在のユーザーの行動ログを一括削除", description = "現在のユーザーの行動ログを一括削除します")
     @DeleteMapping("/my/batch")
-    public Result<Boolean> batchDeleteMyActions(@RequestBody @Valid @Parameter(description = "记录ID列表") 
+    public Result<Boolean> batchDeleteMyActions(@RequestBody @Valid @Parameter(description = "ログIDリスト") 
                                               List<Long> ids) {
         Long userId = SecurityUtils.getUserId();
         boolean success = userActionService.batchDeleteMyActions(userId, ids);
@@ -109,30 +109,30 @@ public class UserActionController {
     }
     
     /**
-     * 获取景点的浏览数
+     * スポットの閲覧数を取得
      *
-     * @param itemId 物品ID
-     * @return 浏览数
+     * @param itemId アイテムID
+     * @return 閲覧数
      */
-    @Operation(summary = "获取景点的浏览数", description = "获取指定景点的浏览数")
+    @Operation(summary = "スポットの閲覧数を取得", description = "指定されたスポットの閲覧数を取得します")
     @GetMapping("/view/count/{itemId}")
     public Result<Long> getViewCount(@PathVariable Long itemId) {
-        // 浏览行为类型为0
+        // 閲覧アクションのタイプは0
         long count = userActionService.getActionCountByItemIdAndType(itemId, 0);
         return Result.success(count);
     }
     
     /**
-     * 获取景点的预约数
+     * スポットの予約数を取得
      *
-     * @param itemId 物品ID
-     * @return 预约数
+     * @param itemId アイテムID
+     * @return 予約数
      */
-    @Operation(summary = "获取景点的预约数", description = "获取指定景点的预约数")
+    @Operation(summary = "スポットの予約数を取得", description = "指定されたスポットの予約数を取得します")
     @GetMapping("/reservation/count/{itemId}")
     public Result<Long> getReservationCount(@PathVariable Long itemId) {
-        // 预约行为类型为1
+        // 予約アクションのタイプは1
         long count = userActionService.getActionCountByItemIdAndType(itemId, 1);
         return Result.success(count);
     }
-} 
+}

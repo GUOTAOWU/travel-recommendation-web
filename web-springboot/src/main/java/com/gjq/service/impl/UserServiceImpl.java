@@ -24,111 +24,111 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.Serializable;
 
 /**
- * 用户服务实现类
+ * ユーザーサービス実装クラス
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor  // 自动为所有标记了 final 的字段生成构造函数并进行依赖注入
+@RequiredArgsConstructor  // finalが付与されたすべてのフィールドを対象に構造生成および依存性注入を自動で行う
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     private final FileClient fileClient;
 
     @Override
     public UserLoginVO login(UserLoginDTO dto) {
-        // 查询用户
+        // ユーザーを検索
         User user = lambdaQuery()
                 .eq(User::getUsername, dto.getUsername())
                 .one();
         if (user == null) {
-            throw new BusinessException("用户不存在");
+            throw new BusinessException("ユーザーが存在しません");
         }
 
-        // 校验密码
+        // パスワード照合
         if (!SecureUtil.md5(dto.getPassword()).equals(user.getPassword())) {
-            throw new BusinessException("密码错误");
+            throw new BusinessException("パスワードが間違っています");
         }
 
-        // 校验状态
+        // ステータス確認
         if (user.getStatus() == 0) {
-            throw new BusinessException("账号已被禁用");
+            throw new BusinessException("アカウントが無効化されています");
         }
 
-        // 创建登录响应对象
+        // ログイン応答オブジェクトの作成
         UserLoginVO loginVO = new UserLoginVO(user, null, fileClient);
-        // 生成token
+        // トークンの生成
         String token = JwtUtils.generateToken(loginVO.getUserInfo().getId());
-        // 设置token
+        // トークンの設定
         loginVO.setToken(token);
         return loginVO;
     }
 
     @Override
     public void register(UserRegisterDTO dto) {
-        // 校验用户名是否存在
+        // ユーザー名の重複チェック
         if (lambdaQuery().eq(User::getUsername, dto.getUsername()).count() > 0) {
-            throw new BusinessException("用户名已存在");
+            throw new BusinessException("ユーザー名が既に存在します");
         }
 
-        // 创建用户
+        // ユーザー作成
         User user = BeanUtil.copyProperties(dto, User.class);
-        // 设置密码
+        // パスワードの設定（MD5暗号化）
         user.setPassword(SecureUtil.md5(dto.getPassword()));
-        // 设置角色
+        // デフォルトロールの設定（0:一般ユーザー）
         user.setRole(0);
-        // 设置状态
+        // ステータスの設定（1:有効）
         user.setStatus(1);
 
-        // 保存用户
+        // ユーザー保存
         save(user);
     }
 
     @Override
     public void updatePassword(UserPasswordDTO dto) {
-        // 查询用户
+        // ユーザー確認
         User user = getById(dto.getId());
         if (user == null) {
-            throw new BusinessException("用户不存在");
+            throw new BusinessException("ユーザーが存在しません");
         }
 
-        // 校验原密码
+        // 元のパスワードの検証
         if (!SecureUtil.md5(dto.getOldPassword()).equals(user.getPassword())) {
-            throw new BusinessException("原密码错误");
+            throw new BusinessException("元のパスワードが間違っています");
         }
 
-        // 更新密码
+        // パスワードの更新
         user.setPassword(SecureUtil.md5(dto.getNewPassword()));
         updateById(user);
     }
 
     @Override
     public void updateUser(UserUpdateDTO dto) {
-        // 查询用户
+        // ユーザー確認
         User user = getById(dto.getId());
         if (user == null) {
-            throw new BusinessException("用户不存在");
+            throw new BusinessException("ユーザーが存在しません");
         }
 
-        // 如果更新了头像，需要删除旧头像
+        // アバターが更新された場合、古いアバターファイルを削除
         if ((dto.getAvatarBucket() != null && !dto.getAvatarBucket().equals(user.getAvatarBucket())) ||
             (dto.getAvatarObjectKey() != null && !dto.getAvatarObjectKey().equals(user.getAvatarObjectKey()))) {
             if (StrUtil.isNotBlank(user.getAvatarBucket()) && StrUtil.isNotBlank(user.getAvatarObjectKey())) {
                 try {
                     fileClient.delete(user.getAvatarBucket(), user.getAvatarObjectKey());
                 } catch (Exception e) {
-                    // 删除失败不影响更新
-                    log.error("删除旧头像失败", e);
+                    // 削除失敗は更新処理自体には影響させない
+                    log.error("旧アバターの削除に失敗しました", e);
                 }
             }
         }
 
-        // 更新用户信息
+        // ユーザー情報の更新
         BeanUtil.copyProperties(dto, user);
         updateById(user);
     }
 
     @Override
     public IPage<User> getUserPage(UserQueryDTO dto) {
-        // 构建查询条件
+        // 検索条件の構築
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>()
                 .like(StrUtil.isNotBlank(dto.getUsername()), User::getUsername, dto.getUsername())
                 .like(StrUtil.isNotBlank(dto.getRealName()), User::getRealName, dto.getRealName())
@@ -137,68 +137,68 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(dto.getRole() != null, User::getRole, dto.getRole())
                 .eq(dto.getStatus() != null, User::getStatus, dto.getStatus());
 
-        // 执行分页查询
+        // ページング検索の実行
         return page(new Page<>(dto.getCurrent(), dto.getSize()), wrapper);
     }
 
     @Override
     public UserLoginVO getCurrentUser() {
-        // 使用 SecurityUtils 获取当前用户
+        // SecurityUtilsを使用して現在のユーザーを取得
         User user = SecurityUtils.getCurrentUser();
-        // 返回用户信息（不需要返回 token，因为 token 已经在客户端了）
+        // ユーザー情報を返す（トークンは既にクライアント側にあるためnullを設定）
         return new UserLoginVO(user, null, fileClient);
     }
 
     @Override
     public void logout() {
-        // 前端清除 token 即可，后端不需要处理
+        // フロントエンド側でトークンを破棄するため、バックエンドでの処理は不要
     }
 
     @Override
     public void addUser(UserAddDTO dto) {
-        // 校验用户名是否存在
+        // ユーザー名の重複チェック
         if (lambdaQuery().eq(User::getUsername, dto.getUsername()).count() > 0) {
-            throw new BusinessException("用户名已存在");
+            throw new BusinessException("ユーザー名が既に存在します");
         }
 
-        // 创建用户
+        // ユーザー作成
         User user = BeanUtil.copyProperties(dto, User.class);
-        // 设置密码（使用MD5加密）
+        // パスワードの設定（MD5暗号化）
         user.setPassword(SecureUtil.md5(dto.getPassword()));
-        // 设置状态为正常
+        // ステータスを「有効」に設定
         user.setStatus(1);
 
-        // 保存用户
+        // ユーザー保存
         save(user);
     }
 
     @Override
     public void resetPassword(Long id) {
-        // 查询用户
+        // ユーザー確認
         User user = getById(id);
         if (user == null) {
-            throw new BusinessException("用户不存在");
+            throw new BusinessException("ユーザーが存在しません");
         }
 
-        // 重置密码为123456
+        // パスワードを初期値「123456」にリセット
         user.setPassword(SecureUtil.md5("123456"));
         updateById(user);
     }
 
     @Override
     public void updateStatus(Long id, Integer status) {
-        // 查询用户
+        // ユーザー確認
         User user = getById(id);
         if (user == null) {
-            throw new BusinessException("用户不存在");
+            throw new BusinessException("ユーザーが存在しません");
         }
 
-        // 不能修改管理员状态
+        // 管理者のステータスは変更不可
         if (user.getRole() == 1) {
-            throw new BusinessException("不能修改管理员状态");
+            throw new BusinessException("管理者のステータスを変更することはできません");
         }
 
-        // 更新状态
+        // ステータス更新
         user.setStatus(status);
         updateById(user);
     }
@@ -206,27 +206,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional
     public boolean removeById(Serializable id) {
-        // 查询用户
+        // ユーザー確認
         User user = getById(id);
         if (user == null) {
             return false;
         }
 
-        // 不能删除管理员
+        // 管理者は削除不可
         if (user.getRole() == 1) {
-            throw new BusinessException("不能删除管理员");
+            throw new BusinessException("管理者を削除することはできません");
         }
 
-        // 删除用户头像
+        // ユーザーのアバターファイルを削除
         if (StrUtil.isNotBlank(user.getAvatarBucket()) && StrUtil.isNotBlank(user.getAvatarObjectKey())) {
             try {
                 fileClient.delete(user.getAvatarBucket(), user.getAvatarObjectKey());
             } catch (Exception e) {
-                log.error("删除用户头像失败", e);
+                log.error("ユーザーアバターの削除に失敗しました", e);
             }
         }
 
-        // 删除用户
+        // ユーザーを削除
         return super.removeById(id);
     }
-} 
+}

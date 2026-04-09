@@ -32,7 +32,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:current', 'update:size', 'change'])
 
-// 计算属性用于双向绑定
+// 双方向バインディング用の算出プロパティ
 const currentPage = computed({
   get: () => props.current,
   set: (val: number) => emit('update:current', val)
@@ -43,12 +43,12 @@ const pageSize = computed({
   set: (val: number) => emit('update:size', val)
 })
 
-// 页码变化事件
+// ページ番号変更イベント
 const handleCurrentChange = (val: number) => {
   emit('change')
 }
 
-// 每页条数变化事件
+// 1ページあたりの件数変更イベント
 const handleSizeChange = (val: number) => {
   emit('change')
 }
@@ -60,4 +60,4 @@ const handleSizeChange = (val: number) => {
   display: flex;
   justify-content: center;
 }
-</style> 
+</style>

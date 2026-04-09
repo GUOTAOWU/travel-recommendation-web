@@ -4,19 +4,19 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
- * 用户登录DTO
+ * ユーザーログインDTO
  */
 @Data
 public class UserLoginDTO {
     /**
-     * 用户名
+     * ユーザー名
      */
-    @NotBlank(message = "用户名不能为空")
+    @NotBlank(message = "ユーザー名は必須です")
     private String username;
 
     /**
-     * 密码
+     * パスワード
      */
-    @NotBlank(message = "密码不能为空")
+    @NotBlank(message = "パスワードは必須です")
     private String password;
-} 
+}

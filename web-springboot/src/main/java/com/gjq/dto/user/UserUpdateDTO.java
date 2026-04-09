@@ -6,50 +6,50 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 /**
- * 用户更新DTO
+ * ユーザー更新DTO
  */
 @Data
 public class UserUpdateDTO {
     /**
-     * 用户ID
+     * ユーザーID
      */
-    @NotNull(message = "用户ID不能为空")
+    @NotNull(message = "ユーザーIDは必須です")
     private Long id;
 
     /**
-     * 真实姓名
+     * 氏名
      */
     private String realName;
 
     /**
-     * 手机号
+     * 電話番号
      */
-    @Pattern(regexp = "^$|^1[3-9]\\d{9}$", message = "手机号格式不正确")
+    @Pattern(regexp = "^$|^1[3-9]\\d{9}$", message = "電話番号の形式が正しくありません")
     private String phone;
 
     /**
-     * 邮箱
+     * メールアドレス
      */
-    @Email(message = "邮箱格式不正确")
+    @Email(message = "メールアドレスの形式が正しくありません")
     private String email;
 
     /**
-     * 头像存储桶
+     * アバターのバケット名
      */
     private String avatarBucket;
 
     /**
-     * 头像对象键
+     * アバターのオブジェクトキー
      */
     private String avatarObjectKey;
 
     /**
-     * 角色(0:普通用户 1:管理员)
+     * ロール（0: 一般ユーザー、1: 管理者）
      */
     private Integer role;
 
     /**
-     * 状态(0:禁用 1:启用)
+     * ステータス（0: 無効、1: 有効）
      */
     private Integer status;
-} 
+}

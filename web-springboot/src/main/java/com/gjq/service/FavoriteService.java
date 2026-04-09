@@ -8,59 +8,59 @@ import com.gjq.vo.favorite.FavoriteVO;
 import java.util.List;
 
 /**
- * 收藏Service
+ * お気に入りサービス
  */
 public interface FavoriteService extends IService<Favorite> {
 
     /**
-     * 添加收藏
+     * お気に入りに追加します
      *
-     * @param userId 用户ID
-     * @param itemId 物品ID
-     * @return 是否成功
+     * @param userId ユーザーID
+     * @param itemId アイテムID
+     * @return 成功した場合はtrue
      */
     boolean addFavorite(Long userId, Long itemId);
 
     /**
-     * 取消收藏
+     * お気に入りを取り消します
      *
-     * @param userId 用户ID
-     * @param itemId 物品ID
-     * @return 是否成功
+     * @param userId ユーザーID
+     * @param itemId アイテムID
+     * @return 成功した場合はtrue
      */
     boolean removeFavorite(Long userId, Long itemId);
 
     /**
-     * 查询用户是否收藏
+     * ユーザーがお気に入り登録しているか確認します
      *
-     * @param userId 用户ID
-     * @param itemId 物品ID
-     * @return 是否收藏
+     * @param userId ユーザーID
+     * @param itemId アイテムID
+     * @return お気に入り登録されている場合はtrue
      */
     boolean isFavorite(Long userId, Long itemId);
 
     /**
-     * 获取用户收藏的物品ID列表
+     * ユーザーがお気に入り登録したアイテムIDリストを取得します
      *
-     * @param userId 用户ID
-     * @return 物品ID列表
+     * @param userId ユーザーID
+     * @return アイテムIDリスト
      */
     List<Long> getUserFavoriteItemIds(Long userId);
 
     /**
-     * 分页获取用户收藏列表
+     * ユーザーのお気に入りリストをページングして取得します
      *
-     * @param userId 用户ID
-     * @param page 分页参数
-     * @return 收藏列表
+     * @param userId ユーザーID
+     * @param page ページングパラメータ
+     * @return お気に入りリスト
      */
     Page<FavoriteVO> getUserFavorites(Long userId, Page<Favorite> page);
 
     /**
-     * 获取物品收藏数
+     * アイテムのお気に入り登録数を取得します
      *
-     * @param itemId 物品ID
-     * @return 收藏数
+     * @param itemId アイテムID
+     * @return お気に入り数
      */
     long getFavoriteCount(Long itemId);
-} 
+}

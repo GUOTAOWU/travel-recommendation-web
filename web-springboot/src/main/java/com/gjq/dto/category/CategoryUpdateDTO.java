@@ -7,27 +7,27 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * 更新类别DTO
+ * カテゴリ更新DTO
  */
 @Data
-@Schema(description = "更新类别DTO")
+@Schema(description = "カテゴリ更新DTO")
 public class CategoryUpdateDTO {
 
-    @Schema(description = "类别ID", required = true)
-    @NotNull(message = "类别ID不能为空")
+    @Schema(description = "カテゴリID", required = true)
+    @NotNull(message = "カテゴリIDは必須です")
     private Long id;
 
-    @Schema(description = "类别名称")
-    @Size(max = 50, message = "类别名称长度不能超过50个字符")
+    @Schema(description = "カテゴリ名")
+    @Size(max = 50, message = "カテゴリ名は50文字以内で入力してください")
     private String name;
 
-    @Schema(description = "类别描述")
-    @Size(max = 255, message = "类别描述长度不能超过255个字符")
+    @Schema(description = "カテゴリ説明")
+    @Size(max = 255, message = "カテゴリ説明は255文字以内で入力してください")
     private String description;
 
-    @Schema(description = "图标存储桶")
+    @Schema(description = "アイコンのバケット名")
     private String iconBucket;
 
-    @Schema(description = "图标对象键")
+    @Schema(description = "アイコンのオブジェクトキー")
     private String iconObjectKey;
-} 
+}

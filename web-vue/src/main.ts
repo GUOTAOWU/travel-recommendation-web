@@ -12,7 +12,7 @@ import { useUserStore } from './stores/user'
 const app = createApp(App)
 const pinia = createPinia()
 
-// 注册 Element Plus 图标
+// Element Plus アイコンをグローバルに登録
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
@@ -21,7 +21,7 @@ app.use(pinia)
 app.use(router)
 app.use(ElementPlus)
 
-// 初始化用户状态
+// ユーザー状態（ログインセッション等）の初期化
 const userStore = useUserStore()
 userStore.initUserInfo()
 

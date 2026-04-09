@@ -6,16 +6,16 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 查询类别DTO
+ * カテゴリ検索DTO
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Schema(description = "查询类别DTO")
+@Schema(description = "カテゴリ検索DTO")
 public class CategoryQueryDTO extends PageDTO {
 
-    @Schema(description = "类别名称")
+    @Schema(description = "カテゴリ名")
     private String name;
 
-    @Schema(description = "类别描述")
+    @Schema(description = "カテゴリ説明")
     private String description;
-} 
+}

@@ -1,7 +1,7 @@
-// 收藏相关的类型定义
+// お気に入り関連の型定義
 import type { ItemVO } from './item'
 
-// 收藏实体
+// お気に入りエンティティ
 export interface Favorite {
   id: number;
   userId: number;
@@ -9,21 +9,21 @@ export interface Favorite {
   createTime: string;
 }
 
-// 收藏DTO
+// お気に入りDTO
 export interface FavoriteDTO {
   itemId: number;
 }
 
-// 收藏状态响应
+// お気に入り状態レスポンス
 export interface FavoriteStatusResponse {
   isFavorite: boolean;
 }
 
-// 收藏VO
+// お気に入りVO
 export interface FavoriteVO {
   id: number;
   userId: number;
   itemId: number;
   item: ItemVO;
   createTime: string;
-} 
+}

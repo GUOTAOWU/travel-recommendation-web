@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 评论Service实现
+ * コメントサービス実装クラス
  */
 @Service
 @Slf4j
@@ -50,7 +50,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         comment.setReplyToCommentId(commentAddDTO.getReplyToCommentId());
         comment.setReplyToUserId(commentAddDTO.getReplyToUserId());
         
-        // 保存评论
+        // コメントを保存
         save(comment);
         
         return comment.getId();
@@ -59,39 +59,39 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Override
     @Transactional
     public boolean deleteCommentWithPermissionCheck(Long userId, Long commentId, boolean isAdmin, Long itemCreatorId) {
-        // 检查评论是否存在
+        // コメントが存在するかチェック
         Comment comment = getById(commentId);
         if (comment == null) {
-            throw new BusinessException("评论不存在");
+            throw new BusinessException("コメントが存在しません");
         }
         
-        // 权限检查
+        // 権限チェック
         boolean hasPermission = false;
         
-        // 1. 管理员可以删除任何评论
+        // 1. 管理者はすべてのコメントを削除可能
         if (isAdmin) {
             hasPermission = true;
         } 
-        // 2. 物品发布者可以删除自己物品下的所有评论
+        // 2. アイテムの投稿者は自身のアイテムに対するすべてのコメントを削除可能
         else if (itemCreatorId != null && itemCreatorId.equals(userId) && 
                  comment.getItemId() != null) {
             hasPermission = true;
         } 
-        // 3. 普通用户只能删除自己发布的评论
+        // 3. 一般ユーザーは自身が投稿したコメントのみ削除可能
         else if (comment.getUserId().equals(userId)) {
             hasPermission = true;
         }
         
         if (!hasPermission) {
-            throw new BusinessException("你没有权限删除此评论");
+            throw new BusinessException("このコメントを削除する権限がありません");
         }
         
-        // 如果是顶级评论，删除所有回复
+        // トップレベルコメントの場合、付随するすべての返信も削除
         if (comment.getParentId() == null) {
             remove(new LambdaQueryWrapper<Comment>().eq(Comment::getParentId, commentId));
         }
         
-        // 删除评论
+        // コメントを削除
         return removeById(commentId);
     }
 
@@ -107,58 +107,58 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
     @Override
     public Page<CommentVO> pageComments(CommentQueryDTO queryDTO) {
-        // 构建查询条件
+        // 検索条件を構築
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
         
-        // 如果指定了物品ID，则查询该物品下的评论
+        // アイテムIDが指定されている場合、そのアイテムのコメントを検索
         if (queryDTO.getItemId() != null) {
             queryWrapper.eq(Comment::getItemId, queryDTO.getItemId());
         }
         
-        // 如果指定了用户ID，则查询该用户的评论
+        // ユーザーIDが指定されている場合、そのユーザーのコメントを検索
         if (queryDTO.getUserId() != null) {
             queryWrapper.eq(Comment::getUserId, queryDTO.getUserId());
         }
         
-        // 如果只查询顶级评论
+        // トップレベルコメントのみを検索する場合
         if (queryDTO.getOnlyParent() != null && queryDTO.getOnlyParent()) {
             queryWrapper.isNull(Comment::getParentId);
         }
         
-        // 按时间倒序
+        // 日時の降順でソート
         queryWrapper.orderByDesc(Comment::getCreateTime);
         
-        // 分页查询
+        // ページング検索
         Page<Comment> page = new Page<>(queryDTO.getCurrent(), queryDTO.getSize());
         page = page(page, queryWrapper);
         
-        // 转换为VO
+        // VOへ変換
         Page<CommentVO> voPage = new Page<>();
         BeanUtils.copyProperties(page, voPage, "records");
         
-        // 获取所有评论用户ID
+        // すべてのコメント投稿者のユーザーIDを取得
         List<Long> userIds = page.getRecords().stream()
                 .map(Comment::getUserId)
                 .distinct()
                 .collect(Collectors.toList());
         
-        // 添加被回复用户ID
+        // 返信先ユーザーのIDを追加
         page.getRecords().stream()
                 .filter(comment -> comment.getReplyToUserId() != null)
                 .map(Comment::getReplyToUserId)
                 .distinct()
                 .forEach(userIds::add);
         
-        // 批量查询用户信息
+        // ユーザー情報を一括取得
         Map<Long, UserInfo> userMap = getUserMap(userIds);
         
-        // 转换记录
+        // レコードを変換
         List<CommentVO> commentVOList = page.getRecords().stream()
                 .map(comment -> {
                     CommentVO vo = convertToVO(comment);
-                    // 设置用户信息
+                    // ユーザー情報を設定
                     vo.setUserInfo(userMap.get(comment.getUserId()));
-                    // 设置被回复用户信息
+                    // 返信先ユーザー情報を設定
                     if (comment.getReplyToUserId() != null) {
                         vo.setReplyToUserInfo(userMap.get(comment.getReplyToUserId()));
                     }
@@ -173,7 +173,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
 
     @Override
     public List<CommentVO> getCommentTreeByItemId(Long itemId) {
-        // 查询该物品的所有评论
+        // 該当アイテムのすべてのコメントを検索
         LambdaQueryWrapper<Comment> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Comment::getItemId, itemId);
         queryWrapper.orderByDesc(Comment::getCreateTime);
@@ -183,29 +183,29 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             return new ArrayList<>();
         }
         
-        // 获取所有评论用户ID
+        // すべてのコメント投稿者のユーザーIDを取得
         List<Long> userIds = comments.stream()
                 .map(Comment::getUserId)
                 .distinct()
                 .collect(Collectors.toList());
         
-        // 添加被回复用户ID
+        // 返信先ユーザーのIDを追加
         comments.stream()
                 .filter(comment -> comment.getReplyToUserId() != null)
                 .map(Comment::getReplyToUserId)
                 .distinct()
                 .forEach(userIds::add);
         
-        // 批量查询用户信息
+        // ユーザー情報を一括取得
         Map<Long, UserInfo> userMap = getUserMap(userIds);
         
-        // 转换为VO
+        // VOへ変換
         List<CommentVO> commentVOList = comments.stream()
                 .map(comment -> {
                     CommentVO vo = convertToVO(comment);
-                    // 设置用户信息
+                    // ユーザー情報を設定
                     vo.setUserInfo(userMap.get(comment.getUserId()));
-                    // 设置被回复用户信息
+                    // 返信先ユーザー情報を設定
                     if (comment.getReplyToUserId() != null) {
                         vo.setReplyToUserInfo(userMap.get(comment.getReplyToUserId()));
                     }
@@ -213,12 +213,12 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 })
                 .collect(Collectors.toList());
         
-        // 构建评论树
+        // コメントツリーを構築
         return buildCommentTree(commentVOList);
     }
     
     /**
-     * 将评论转换为VO
+     * コメントをVOに変換
      */
     private CommentVO convertToVO(Comment comment) {
         CommentVO vo = new CommentVO();
@@ -227,24 +227,24 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     }
     
     /**
-     * 构建评论树
+     * コメントツリーを構築
      */
     private List<CommentVO> buildCommentTree(List<CommentVO> commentList) {
-        // 顶级评论
+        // トップレベルコメントの抽出
         List<CommentVO> rootComments = commentList.stream()
                 .filter(comment -> comment.getParentId() == null)
                 .collect(Collectors.toList());
         
-        // 回复评论
+        // 返信コメントの抽出とグループ化
         Map<Long, List<CommentVO>> replyMap = commentList.stream()
                 .filter(comment -> comment.getParentId() != null)
                 .collect(Collectors.groupingBy(CommentVO::getParentId));
         
-        // 组装树形结构
+        // ツリー構造の組み立て
         rootComments.forEach(root -> {
             List<CommentVO> replies = replyMap.get(root.getId());
             if (replies != null) {
-                // 按时间排序，最新的回复在最下面
+                // 時系列でソート（最新の返信を末尾にする）
                 replies.sort((a, b) -> a.getCreateTime().compareTo(b.getCreateTime()));
                 root.setReplies(replies);
             } else {
@@ -256,17 +256,17 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     }
     
     /**
-     * 批量获取用户信息
+     * ユーザー情報を一括取得
      */
     private Map<Long, UserInfo> getUserMap(List<Long> userIds) {
         if (userIds.isEmpty()) {
             return new HashMap<>();
         }
         
-        // 批量查询用户
+        // ユーザーを一括検索
         List<User> users = userService.listByIds(userIds);
         
-        // 转换为UserInfo
+        // UserInfoに変換してMapに格納
         Map<Long, UserInfo> userMap = new HashMap<>();
         users.forEach(user -> {
             UserInfo userInfo = new UserInfo(user, fileClient);
@@ -275,4 +275,4 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         
         return userMap;
     }
-} 
+}

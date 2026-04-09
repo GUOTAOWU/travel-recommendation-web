@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 收藏控制器
+ * お気に入りコントローラー
  */
 @RestController
 @RequestMapping("/favorite")
@@ -24,36 +24,36 @@ public class FavoriteController {
     private FavoriteService favoriteService;
 
     /**
-     * 添加收藏
+     * お気に入りに追加
      *
-     * @param favoriteDTO 收藏DTO
-     * @return 结果
+     * @param favoriteDTO お気に入りDTO
+     * @return 実行結果
      */
     @PostMapping
     public Result<?> addFavorite(@RequestBody FavoriteDTO favoriteDTO) {
         Long userId = SecurityUtils.getUserId();
         boolean success = favoriteService.addFavorite(userId, favoriteDTO.getItemId());
-        return success ? Result.success() : Result.error("收藏失败");
+        return success ? Result.success() : Result.error("お気に入り登録に失敗しました");
     }
 
     /**
-     * 取消收藏
+     * お気に入りを解除
      *
-     * @param itemId 物品ID
-     * @return 结果
+     * @param itemId アイテムID
+     * @return 実行結果
      */
     @DeleteMapping("/{itemId}")
     public Result<?> removeFavorite(@PathVariable Long itemId) {
         Long userId = SecurityUtils.getUserId();
         boolean success = favoriteService.removeFavorite(userId, itemId);
-        return success ? Result.success() : Result.error("取消收藏失败");
+        return success ? Result.success() : Result.error("お気に入り解除に失敗しました");
     }
 
     /**
-     * 查询收藏状态
+     * お気に入り状態を確認
      *
-     * @param itemId 物品ID
-     * @return 收藏状态
+     * @param itemId アイテムID
+     * @return お気に入り状態
      */
     @GetMapping("/status/{itemId}")
     public Result<Boolean> status(@PathVariable Long itemId) {
@@ -63,9 +63,9 @@ public class FavoriteController {
     }
 
     /**
-     * 获取用户收藏的物品ID列表
+     * ユーザーがお気に入り登録したアイテムID一覧を取得
      *
-     * @return 物品ID列表
+     * @return アイテムID一覧
      */
     @GetMapping("/user/items")
     public Result<List<Long>> userFavoriteItems() {
@@ -75,10 +75,10 @@ public class FavoriteController {
     }
 
     /**
-     * 分页获取用户收藏列表
+     * ユーザーのお気に入り一覧をページング形式で取得
      *
-     * @param pageDTO 分页参数
-     * @return 收藏列表
+     * @param pageDTO ページングパラメータ
+     * @return お気に入り一覧
      */
     @GetMapping("/user/page")
     public Result<Page<FavoriteVO>> userFavoritePage(PageDTO pageDTO) {
@@ -89,10 +89,10 @@ public class FavoriteController {
     }
 
     /**
-     * 获取物品收藏数
+     * アイテムのお気に入り数を取得
      *
-     * @param itemId 物品ID
-     * @return 收藏数
+     * @param itemId アイテムID
+     * @return お気に入り数
      */
     @GetMapping("/count/{itemId}")
     public Result<Long> getFavoriteCount(@PathVariable Long itemId) {
@@ -101,10 +101,9 @@ public class FavoriteController {
     }
     
     /**
-     * 管理员分页获取所有收藏数据
-     * 
-     * @param pageDTO 分页参数
-     * @return 收藏数据列表
+     * 管理者用：全お気に入りデータのページング取得
+     * * @param pageDTO ページングパラメータ
+     * @return お気に入りデータ一覧
      */
     @GetMapping("/admin/page")
     public Result<Page<Favorite>> adminFavoritePage(PageDTO pageDTO) {
@@ -112,4 +111,4 @@ public class FavoriteController {
         Page<Favorite> resultPage = favoriteService.page(page);
         return Result.success(resultPage);
     }
-} 
+}

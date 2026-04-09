@@ -19,11 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * 景点控制器
+ * スポットコントローラー
  */
 @RestController
 @RequestMapping("/item")
-@Tag(name = "景点管理", description = "景点相关接口")
+@Tag(name = "スポット管理", description = "スポット関連インターフェース")
 public class ItemController {
 
     @Autowired
@@ -33,17 +33,17 @@ public class ItemController {
     private FileClient fileClient;
 
     /**
-     * 添加景点
+     * スポットを追加
      */
     @PostMapping
-    @Operation(summary = "添加景点", description = "添加景点信息")
+    @Operation(summary = "スポットを追加", description = "スポット情報を追加します")
     public Result<Long> add(@RequestBody ItemAddDTO dto) {
-        // 校验权限
+        // 権限チェック
         if (!SecurityUtils.isAdmin()) {
-            return Result.error("权限不足");
+            return Result.error("権限が不足しています");
         }
         
-        // 设置创建者为当前登录用户
+        // 作成者を現在ログイン中のユーザーに設定
         dto.setUserId(SecurityUtils.getUserId());
         
         Long id = itemService.add(dto);
@@ -51,24 +51,24 @@ public class ItemController {
     }
 
     /**
-     * 更新景点
+     * スポットを更新
      */
     @PutMapping
-    @Operation(summary = "更新景点", description = "更新景点信息")
+    @Operation(summary = "スポットを更新", description = "スポット情報を更新します")
     public Result<Void> update(@RequestBody ItemUpdateDTO dto) {
         itemService.update(dto);
         return Result.success();
     }
 
     /**
-     * 删除景点
+     * スポットを削除
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "删除景点", description = "根据ID删除景点")
-    public Result<Void> delete(@Parameter(description = "景点ID", required = true) @PathVariable Long id) {
-        // 校验权限
+    @Operation(summary = "スポットを削除", description = "IDに基づいてスポットを削除します")
+    public Result<Void> delete(@Parameter(description = "スポットID", required = true) @PathVariable Long id) {
+        // 権限チェック
         if (!SecurityUtils.isAdmin()) {
-            return Result.error("权限不足");
+            return Result.error("権限が不足しています");
         }
         
         itemService.delete(id);
@@ -76,44 +76,44 @@ public class ItemController {
     }
 
     /**
-     * 获取景点详情
+     * スポット詳細を取得
      */
     @GetMapping("/{id}")
-    @Operation(summary = "获取景点详情", description = "根据ID获取景点详情")
-    public Result<ItemVO> getById(@Parameter(description = "景点ID", required = true) @PathVariable Long id) {
+    @Operation(summary = "スポット詳細を取得", description = "IDに基づいてスポット詳細を取得します")
+    public Result<ItemVO> getById(@Parameter(description = "スポットID", required = true) @PathVariable Long id) {
         ItemVO vo = itemService.getById(id);
         return Result.success(vo);
     }
 
     /**
-     * 分页查询景点
+     * スポットのページング検索
      */
     @GetMapping("/page")
-    @Operation(summary = "分页查询景点", description = "分页查询景点信息")
+    @Operation(summary = "スポットのページング検索", description = "スポット情報をページング検索します")
     public Result<Page<ItemVO>> page(ItemQueryDTO dto) {
         Page<ItemVO> page = itemService.page(dto);
         return Result.success(page);
     }
 
     /**
-     * 根据类别ID获取景点列表
+     * カテゴリIDに基づいてスポット一覧を取得
      */
     @GetMapping("/list/category/{categoryId}")
-    @Operation(summary = "根据类别ID获取景点列表", description = "根据类别ID获取景点列表")
+    @Operation(summary = "カテゴリIDに基づいてスポット一覧を取得", description = "カテゴリIDに基づいてスポット一覧を取得します")
     public Result<List<ItemVO>> listByCategoryId(
-            @Parameter(description = "类别ID", required = true) @PathVariable Long categoryId) {
+            @Parameter(description = "カテゴリID", required = true) @PathVariable Long categoryId) {
         List<ItemVO> list = itemService.listByCategoryId(categoryId);
         return Result.success(list);
     }
 
     /**
-     * 根据标签获取景点列表
+     * タグに基づいてスポット一覧を取得
      */
     @GetMapping("/list/tag/{tag}")
-    @Operation(summary = "根据标签获取景点列表", description = "根据标签获取景点列表")
+    @Operation(summary = "タグに基づいてスポット一覧を取得", description = "タグに基づいてスポット一覧を取得します")
     public Result<List<ItemVO>> listByTag(
-            @Parameter(description = "标签", required = true) @PathVariable String tag) {
+            @Parameter(description = "タグ", required = true) @PathVariable String tag) {
         List<ItemVO> list = itemService.listByTag(tag);
         return Result.success(list);
     }
-} 
+}

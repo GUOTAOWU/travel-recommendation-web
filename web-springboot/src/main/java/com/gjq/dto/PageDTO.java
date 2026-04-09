@@ -3,17 +3,17 @@ package com.gjq.dto;
 import lombok.Data;
 
 /**
- * 分页查询基础DTO
+ * ページング検索基礎DTO
  */
 @Data
 public class PageDTO {
     /**
-     * 当前页码
+     * 現在のページ番号
      */
     private Integer current = 1;
 
     /**
-     * 每页大小
+     * 1ページあたりの表示件数
      */
     private Integer size = 10;
-} 
+}

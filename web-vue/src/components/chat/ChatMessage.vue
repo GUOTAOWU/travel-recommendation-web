@@ -5,23 +5,23 @@ import MarkdownIt from 'markdown-it'
 import { UserFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 
-// 创建markdown-it实例
+// markdown-itインスタンスの作成
 const md = new MarkdownIt({
   html: true,
   breaks: true,
   linkify: true
 })
 
-// 获取用户信息
+// ユーザー情報の取得
 const userStore = useUserStore()
 const userInfo = computed(() => userStore.userInfo)
 
-// 组件属性
+// コンポーネントのプロパティ
 const props = defineProps<{
   message: ChatMessage
 }>()
 
-// 计算消息样式
+// メッセージスタイルの計算
 const messageClass = computed(() => {
   return {
     'message': true,
@@ -30,7 +30,7 @@ const messageClass = computed(() => {
   }
 })
 
-// 格式化显示时间
+// 表示時間のフォーマット
 const formattedTime = computed(() => {
   if (!props.message.messageTime) return ''
   
@@ -38,7 +38,7 @@ const formattedTime = computed(() => {
   return date.toLocaleString()
 })
 
-// 渲染Markdown内容
+// Markdownコンテンツのレンダリング
 const renderedContent = computed(() => {
   if (!props.message.content || props.message.content.trim().length === 0) {
     return ''
@@ -52,18 +52,18 @@ const renderedContent = computed(() => {
     <div class="avatar-container">
       <div class="avatar" :class="message.role === 'user' ? 'avatar-user' : 'avatar-ai'">
         <img v-if="message.role === 'assistant'" src="@/assets/images/logo.png" alt="AI" class="avatar-img" />
-        <img v-else-if="userInfo?.avatarUrl" :src="userInfo.avatarUrl" alt="用户" class="avatar-img" />
+        <img v-else-if="userInfo?.avatarUrl" :src="userInfo.avatarUrl" alt="ユーザー" class="avatar-img" />
         <UserFilled v-else />
       </div>
     </div>
     <div class="message-wrapper">
       <div class="message-header">
-        <div class="message-role">{{ message.role === 'user' ? '我' : 'AI助手' }}</div>
+        <div class="message-role">{{ message.role === 'user' ? '自分' : 'AIアシスタント' }}</div>
         <div v-if="message.role === 'assistant'" class="message-time">{{ formattedTime }}</div>
       </div>
       <div class="message-content">
         <div v-if="message.content && message.content.trim().length > 0" v-html="renderedContent"></div>
-        <p v-else class="empty-content">{{ message.role === 'assistant' ? '等待AI响应...' : '空白消息' }}</p>
+        <p v-else class="empty-content">{{ message.role === 'assistant' ? 'AIの回答を待っています...' : 'メッセージが空です' }}</p>
       </div>
     </div>
   </div>
@@ -241,7 +241,7 @@ const renderedContent = computed(() => {
   margin: 0;
 }
 
-/* 创建聊天气泡的小尾巴 */
+/* チャット吹き出しのしっぽを作成 */
 .message-user .message-wrapper::after {
   content: "";
   position: absolute;
@@ -261,4 +261,4 @@ const renderedContent = computed(() => {
   border-style: solid;
   border-color: transparent #fff transparent transparent;
 }
-</style> 
+</style>

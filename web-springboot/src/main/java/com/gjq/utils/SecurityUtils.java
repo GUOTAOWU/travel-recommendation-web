@@ -11,7 +11,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * 安全工具类
+ * セキュリティユーティリティクラス
  */
 @Component
 public class SecurityUtils implements ApplicationContextAware {
@@ -24,35 +24,37 @@ public class SecurityUtils implements ApplicationContextAware {
     }
 
     /**
-     * 获取当前登录用户
+     * 現在ログイン中のユーザーを取得します
      */
     public static User getCurrentUser() {
         Long userId = getUserId();
         UserService userService = applicationContext.getBean(UserService.class);
         User user = userService.getById(userId);
         if (user == null) {
-            throw new BusinessException("用户不存在");
+            throw new BusinessException("ユーザーが存在しません");
         }
         return user;
     }
 
     /**
-     * 获取当前登录用户ID
+     * 現在ログイン中のユーザーIDを取得します
      */
     public static Long getUserId() {
+        // RequestContextHolderから現在のリクエスト属性を取得し、"userId"属性を抽出します
         Long userId = (Long) ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                 .getRequest().getAttribute("userId");
         if (userId == null) {
-            throw new BusinessException(401, "用户未登录");
+            throw new BusinessException(401, "ユーザーがログインしていません");
         }
         return userId;
     }
 
     /**
-     * 判断当前用户是否为管理员
+     * 現在のユーザーが管理者かどうかを判定します
      */
     public static boolean isAdmin() {
         User user = getCurrentUser();
+        // ロールが1の場合を管理者とみなします
         return user != null && user.getRole() == 1;
     }
-} 
+}

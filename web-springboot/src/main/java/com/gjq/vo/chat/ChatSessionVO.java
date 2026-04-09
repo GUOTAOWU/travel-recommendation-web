@@ -4,38 +4,38 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 聊天会话视图对象
+ * チャットセッションビューオブジェクト
  */
 @Data
 public class ChatSessionVO {
     
     /**
-     * 会话ID
+     * セッションID
      */
     private Long id;
     
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
     
     /**
-     * 会话名称
+     * セッション名
      */
     private String sessionName;
     
     /**
-     * 创建时间
+     * 作成日時
      */
     private LocalDateTime createTime;
     
     /**
-     * 更新时间
+     * 更新日時
      */
     private LocalDateTime updateTime;
     
     /**
-     * 最新消息预览
+     * 最新メッセージのプレビュー
      */
     private String latestMessage;
-} 
+}

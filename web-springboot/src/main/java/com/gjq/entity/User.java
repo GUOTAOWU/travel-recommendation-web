@@ -6,71 +6,71 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 用户实体类
+ * ユーザーエンティティクラス
  */
 @Data
 @TableName("user")
 public class User {
     /**
-     * 用户ID
+     * ユーザーID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 用户名
+     * ユーザー名
      */
     private String username;
 
     /**
-     * 密码
+     * パスワード
      */
     private String password;
 
     /**
-     * 真实姓名
+     * 氏名
      */
     private String realName;
 
     /**
-     * 手机号
+     * 電話番号
      */
     private String phone;
 
     /**
-     * 邮箱
+     * メールアドレス
      */
     private String email;
 
     /**
-     * 头像存储桶
+     * アバターのバケット名
      */
     private String avatarBucket;
 
     /**
-     * 头像对象键
+     * アバターのオブジェクトキー
      */
     private String avatarObjectKey;
 
     /**
-     * 角色(0:普通用户 1:管理员)
+     * ロール（0: 一般ユーザー、1: 管理者）
      */
     private Integer role;
 
     /**
-     * 状态(0:禁用 1:启用)
+     * ステータス（0: 無効、1: 有効）
      */
     private Integer status;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
-     * 更新时间
+     * 更新日時
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-} 
+}

@@ -6,37 +6,37 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 /**
- * 用户注册DTO
+ * ユーザー登録DTO
  */
 @Data
 public class UserRegisterDTO {
     /**
-     * 用户名
+     * ユーザー名
      */
-    @NotBlank(message = "用户名不能为空")
+    @NotBlank(message = "ユーザー名は必須です")
     private String username;
 
     /**
-     * 密码
+     * パスワード
      */
-    @NotBlank(message = "密码不能为空")
+    @NotBlank(message = "パスワードは必須です")
     private String password;
 
     /**
-     * 真实姓名
+     * 氏名
      */
-    @NotBlank(message = "真实姓名不能为空")
+    @NotBlank(message = "氏名は必須です")
     private String realName;
 
     /**
-     * 手机号
+     * 電話番号
      */
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
+    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "電話番号の形式が正しくありません")
     private String phone;
 
     /**
-     * 邮箱
+     * メールアドレス
      */
-    @Email(message = "邮箱格式不正确")
+    @Email(message = "メールアドレスの形式が正しくありません")
     private String email;
-} 
+}

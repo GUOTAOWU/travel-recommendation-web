@@ -8,92 +8,81 @@ import com.gjq.vo.chat.ChatSessionVO;
 import java.util.List;
 
 /**
- * 聊天服务接口
+ * チャットサービスインターフェース
  */
 public interface ChatService {
     
     /**
-     * 创建聊天会话
-     * 
-     * @param dto 聊天会话信息
-     * @return 创建的会话
+     * チャットセッションを作成します
+     * * @param dto チャットセッション情報
+     * @return 作成されたセッション
      */
     ChatSessionVO createSession(ChatSessionDTO dto);
     
     /**
-     * 获取用户的所有聊天会话
-     * 
-     * @return 聊天会话列表
+     * ユーザーのすべてのチャットセッションを取得します
+     * * @return チャットセッションリスト
      */
     List<ChatSessionVO> getUserSessions();
     
     /**
-     * 获取聊天会话详情
-     * 
-     * @param sessionId 会话ID
-     * @return 会话详情
+     * チャットセッションの詳細を取得します
+     * * @param sessionId セッションID
+     * @return セッション詳細
      */
     ChatSessionVO getSessionById(Long sessionId);
     
     /**
-     * 更新聊天会话
-     * 
-     * @param sessionId 会话ID
-     * @param dto 会话信息
-     * @return 更新后的会话
+     * チャットセッションを更新します
+     * * @param sessionId セッションID
+     * @param dto セッション情報
+     * @return 更新後のセッション
      */
     ChatSessionVO updateSession(Long sessionId, ChatSessionDTO dto);
     
     /**
-     * 删除聊天会话
-     * 
-     * @param sessionId 会话ID
+     * チャットセッションを削除します
+     * * @param sessionId セッションID
      */
     void deleteSession(Long sessionId);
     
     /**
-     * 获取会话中的所有消息
-     * 
-     * @param sessionId 会话ID
-     * @return 消息列表
+     * セッション内のすべてのメッセージを取得します
+     * * @param sessionId セッションID
+     * @return メッセージリスト
      */
     List<ChatMessageVO> getSessionMessages(Long sessionId);
     
     /**
-     * 发送消息
-     * 
-     * @param dto 消息信息
-     * @return 发送的消息
+     * メッセージを送信します
+     * * @param dto メッセージ情報
+     * @return 送信されたメッセージ
      */
     ChatMessageVO sendMessage(ChatMessageDTO dto);
     
     /**
-     * 获取消息详情
-     * 
-     * @param messageId 消息ID
-     * @return 消息详情
+     * メッセージの詳細を取得します
+     * * @param messageId メッセージID
+     * @return メッセージ詳細
      */
     ChatMessageVO getMessageById(Long messageId);
     
     /**
-     * 删除消息
-     * 
-     * @param messageId 消息ID
+     * メッセージを削除します
+     * * @param messageId メッセージID
      */
     void deleteMessage(Long messageId);
     
     /**
-     * 清除会话所有聊天记录
-     * 
-     * @param sessionId 会话ID
+     * セッション内のすべてのチャット記録を消去します
+     * * @param sessionId セッションID
      */
     void clearSessionMessages(Long sessionId);
     
     /**
-     * 更新消息内容
-     * 
-     * @param messageId 消息ID
-     * @param content 更新的内容
+     * メッセージ内容を更新します
+     * * @param messageId メッセージID
+     * @param content 更新内容
      */
     void updateMessageContent(Long messageId, String content);
-} 
+}

@@ -6,9 +6,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-/**
- * 项目启动类
- */
+
 @SpringBootApplication
 @EnableScheduling
 @EnableTransactionManagement

@@ -6,56 +6,56 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 评论实体类
+ * コメントエンティティクラス
  */
 @Data
 @TableName("comment")
 public class Comment {
     /**
-     * 评论ID
+     * コメントID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
 
     /**
-     * 物品ID
+     * アイテムID
      */
     private Long itemId;
 
     /**
-     * 评论内容
+     * コメント内容
      */
     private String content;
 
     /**
-     * 父评论ID（为null表示是顶级评论，否则表示回复）
+     * 親コメントID（nullの場合はトップレベルコメント、それ以外は返信を意味します）
      */
     private Long parentId;
     
     /**
-     * 被回复的评论ID
+     * 返信先のコメントID
      */
     private Long replyToCommentId;
     
     /**
-     * 被回复的用户ID
+     * 返信先のユーザーID
      */
     private Long replyToUserId;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
-     * 更新时间
+     * 更新日時
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-} 
+}

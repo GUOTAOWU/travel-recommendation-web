@@ -5,23 +5,23 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 评论查询DTO
+ * コメント検索DTO
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CommentQueryDTO extends PageDTO {
     /**
-     * 物品ID
+     * アイテムID
      */
     private Long itemId;
     
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
     
     /**
-     * 是否只查询顶级评论
+     * トップレベルコメントのみを検索するかどうか
      */
     private Boolean onlyParent;
-} 
+}

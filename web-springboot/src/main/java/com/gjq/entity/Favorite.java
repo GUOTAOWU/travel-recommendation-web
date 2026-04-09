@@ -6,30 +6,30 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 收藏实体类
+ * お気に入りエンティティクラス
  */
 @Data
 @TableName("favorite")
 public class Favorite {
     /**
-     * 收藏ID
+     * お気に入りID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
 
     /**
-     * 物品ID
+     * アイテムID
      */
     private Long itemId;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
-} 
+}

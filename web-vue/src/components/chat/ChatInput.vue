@@ -3,27 +3,27 @@ import { ref } from 'vue'
 import { ElInput, ElButton } from 'element-plus'
 import { Promotion } from '@element-plus/icons-vue'
 
-// 组件属性
+// コンポーネントのプロパティ
 defineProps<{
   loading?: boolean
 }>()
 
-// 定义事件
+// イベントの定義
 const emit = defineEmits<{
   (e: 'send', value: string): void
 }>()
 
-// 输入内容
+// 入力内容
 const message = ref('')
 
-// 发送消息
+// メッセージの送信
 const sendMessage = () => {
   if (!message.value.trim()) return
   emit('send', message.value)
   message.value = ''
 }
 
-// 监听回车键
+// Enterキーの監視
 const handleKeyDown = (e: Event) => {
   const keyEvent = e as KeyboardEvent
   if (keyEvent.key === 'Enter' && !keyEvent.shiftKey) {
@@ -40,7 +40,7 @@ const handleKeyDown = (e: Event) => {
         v-model="message"
         type="textarea"
         :rows="2"
-        placeholder="输入消息内容，按Enter键发送，Shift+Enter换行..."
+        placeholder="メッセージを入力し、Enterで送信、Shift+Enterで改行..."
         resize="none"
         @keydown="handleKeyDown"
         :disabled="loading"
@@ -56,7 +56,7 @@ const handleKeyDown = (e: Event) => {
           size="small"
         >
           <Promotion class="send-icon" />
-          发送
+          送信
         </ElButton>
       </div>
     </div>
@@ -64,6 +64,7 @@ const handleKeyDown = (e: Event) => {
 </template>
 
 <style scoped>
+/* スタイル部分はコード実行に影響するため、コメントがない限りそのままにしています */
 .chat-input {
   width: 100%;
   margin-top: auto;
@@ -126,4 +127,4 @@ const handleKeyDown = (e: Event) => {
   margin-right: 4px;
   font-size: 12px;
 }
-</style> 
+</style>

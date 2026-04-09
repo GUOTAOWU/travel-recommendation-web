@@ -7,10 +7,12 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     redirect: to => {
       const userStore = useUserStore();
+      // 未ログインの場合はログイン画面へ
       if (!userStore.isLoggedIn()) {
         return '/login';
       }
       
+      // 権限に応じてリダイレクト先を振り分け
       if (userStore.isAdmin()) {
         return '/admin';
       } else {
@@ -23,7 +25,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Login',
     component: () => import('@/views/user/Login.vue'),
     meta: {
-      title: '登录',
+      title: 'ログイン',
       requiresAuth: false
     }
   },
@@ -32,7 +34,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Register',
     component: () => import('@/views/user/Register.vue'),
     meta: {
-      title: '注册',
+      title: '新規登録',
       requiresAuth: false
     }
   },
@@ -41,7 +43,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Dashboard',
     component: () => import('@/views/admin/Dashboard.vue'),
     meta: {
-      title: '首页'
+      title: 'ダッシュボード'
     }
   },
   {
@@ -57,7 +59,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserHome',
         component: () => import('@/views/user/Home.vue'),
         meta: {
-          title: '首页',
+          title: 'ホーム',
           requiresAuth: true
         }
       },
@@ -66,7 +68,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserProfile',
         component: () => import('@/views/user/Profile.vue'),
         meta: {
-          title: '个人中心',
+          title: 'マイページ',
           requiresAuth: true
         }
       },
@@ -75,7 +77,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserFavorites',
         component: () => import('@/views/user/MyFavorites.vue'),
         meta: {
-          title: '我的收藏',
+          title: 'お気に入り一覧',
           requiresAuth: true
         }
       },
@@ -84,7 +86,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserBrowsingHistory',
         component: () => import('@/views/history/BrowsingHistory.vue'),
         meta: {
-          title: '浏览历史',
+          title: '閲覧履歴',
           requiresAuth: true
         }
       },
@@ -93,7 +95,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserReservationHistory',
         component: () => import('@/views/history/PurchaseHistory.vue'),
         meta: {
-          title: '预约历史',
+          title: '予約履歴',
           requiresAuth: true
         }
       },
@@ -102,7 +104,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserCategories',
         component: () => import('@/views/category/CategoryList.vue'),
         meta: {
-          title: '分类浏览',
+          title: 'カテゴリー検索',
           requiresAuth: true
         }
       },
@@ -111,7 +113,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserCategoryDetail',
         component: () => import('@/views/category/CategoryDetail.vue'),
         meta: {
-          title: '分类详情',
+          title: 'カテゴリー詳細',
           requiresAuth: true
         }
       },
@@ -120,7 +122,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserItems',
         component: () => import('@/views/item/ItemList.vue'),
         meta: {
-          title: '景点搜索',
+          title: 'スポット検索',
           requiresAuth: true
         }
       },
@@ -129,7 +131,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserItemDetail',
         component: () => import('@/views/item/ItemDetail.vue'),
         meta: {
-          title: '景点详情',
+          title: 'スポット詳細',
           requiresAuth: true
         }
       },
@@ -138,7 +140,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserChatSessionList',
         component: () => import('@/views/chat/ChatView.vue'),
         meta: {
-          title: 'AI聊天',
+          title: 'AIチャット',
           requiresAuth: true
         }
       },
@@ -157,7 +159,7 @@ const routes: RouteRecordRaw[] = [
         name: 'Admin',
         component: () => import('@/views/admin/Dashboard.vue'),
         meta: {
-          title: '管理控制台',
+          title: '管理コンソール',
           requiresAuth: true,
           requiresAdmin: true
         }
@@ -167,7 +169,7 @@ const routes: RouteRecordRaw[] = [
         name: 'KnowledgeGraphManagement',
         component: () => import('@/views/admin/KnowledgeGraphManagement.vue'),
         meta: {
-          title: '知识图谱管理',
+          title: '知識グラフ管理',
           requiresAuth: true,
           requiresAdmin: true
         }
@@ -177,7 +179,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserManagement',
         component: () => import('@/views/admin/UserManagement.vue'),
         meta: {
-          title: '用户管理',
+          title: 'ユーザー管理',
           requiresAuth: true,
           requiresAdmin: true
         }
@@ -187,7 +189,7 @@ const routes: RouteRecordRaw[] = [
         name: 'CategoryManagement',
         component: () => import('@/views/admin/CategoryManagement.vue'),
         meta: {
-          title: '类别管理',
+          title: 'カテゴリー管理',
           requiresAuth: true,
           requiresAdmin: true
         }
@@ -197,7 +199,7 @@ const routes: RouteRecordRaw[] = [
         name: 'ItemManagement',
         component: () => import('@/views/admin/ItemManagement.vue'),
         meta: {
-          title: '景点管理',
+          title: 'スポット管理',
           requiresAuth: true,
           requiresAdmin: true
         }
@@ -207,7 +209,7 @@ const routes: RouteRecordRaw[] = [
         name: 'UserActionHistory',
         component: () => import('@/views/admin/UserActionHistory.vue'),
         meta: {
-          title: '用户行为历史',
+          title: 'ユーザー行動履歴',
           requiresAuth: true,
           requiresAdmin: true
         }
@@ -221,21 +223,23 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫
+// ルートガード（ナビゲーションガード）
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
 
-  // 设置页面标题
-  document.title = `${to.meta.title} - 智能旅游推荐系统`
+  // ページタイトルの設定
+  document.title = `${to.meta.title} - インテリジェント観光推薦システム`
 
   if (requiresAuth) {
+    // 認証が必要なページで未ログインの場合
     if (!userStore.isLoggedIn()) {
       next({ name: 'Login', query: { redirect: to.fullPath } })
       return
     }
 
+    // 管理者権限が必要なページで権限がない場合
     if (requiresAdmin && !userStore.isAdmin()) {
       next({ name: 'UserHome' })
       return
@@ -245,4 +249,4 @@ router.beforeEach((to, from, next) => {
   next()
 })
 
-export default router 
+export default router

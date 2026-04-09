@@ -1,7 +1,11 @@
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
 
-// 获取多折线图配置
+/**
+ * マルチシリーズ折れ線グラフの設定を取得
+ * * @param xData X軸のデータ（時間軸やカテゴリ）
+ * @param series シリーズデータ（名前、数値配列、カラーコード）
+ */
 export const getMultiLineChartOptions = (
   xData: string[],
   series: Array<{
@@ -34,11 +38,12 @@ export const getMultiLineChartOptions = (
     series: series.map(item => ({
       name: item.name,
       type: 'line',
-      smooth: true,
+      smooth: true, // 線を滑らかにする
       data: item.data,
       itemStyle: {
         color: item.color
       },
+      // エリア（塗りつぶし）のグラデーション設定
       areaStyle: {
         color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
           {
@@ -55,7 +60,11 @@ export const getMultiLineChartOptions = (
   }
 }
 
-// 获取饼图配置
+/**
+ * 円グラフの設定を取得
+ * * @param data 表示データ（名前、値、任意の色）
+ * @param title グラフのタイトル（任意）
+ */
 export const getPieChartOptions = (
   data: Array<{
     name: string
@@ -97,7 +106,12 @@ export const getPieChartOptions = (
   }
 }
 
-// 获取柱状图配置
+/**
+ * 棒グラフの設定を取得
+ * * @param xData X軸のラベル
+ * @param series シリーズデータ
+ * @param title グラフのタイトル（任意）
+ */
 export const getBarChartOptions = (
   xData: string[],
   series: Array<{
@@ -140,7 +154,11 @@ export const getBarChartOptions = (
   }
 }
 
-// 获取环形图配置
+/**
+ * ドーナツグラフの設定を取得
+ * * @param data 表示データ
+ * @param title グラフのタイトル（任意）
+ */
 export const getDoughnutChartOptions = (
   data: Array<{
     name: string
@@ -165,7 +183,7 @@ export const getDoughnutChartOptions = (
     series: [
       {
         type: 'pie',
-        radius: ['50%', '70%'],
+        radius: ['50%', '70%'], // 内径と外径を指定してドーナツ状にする
         avoidLabelOverlap: false,
         label: {
           show: false,
@@ -188,4 +206,4 @@ export const getDoughnutChartOptions = (
       }
     ]
   }
-} 
+}

@@ -10,58 +10,58 @@ import com.gjq.vo.useraction.UserActionVO;
 import java.util.List;
 
 /**
- * 用户行为Service接口
+ * ユーザー行動サービスインターフェース
  */
 public interface UserActionService extends IService<UserAction> {
     
     /**
-     * 添加用户行为记录
+     * ユーザー行動記録を追加します
      *
-     * @param userId 用户ID
-     * @param dto 用户行为DTO
-     * @return 是否成功
+     * @param userId ユーザーID
+     * @param dto ユーザー行動DTO
+     * @return 成功した場合はtrue
      */
     boolean addUserAction(Long userId, UserActionDTO dto);
     
     /**
-     * 分页查询用户行为
+     * ユーザー行動をページング検索します
      *
-     * @param dto 查询条件
-     * @return 分页结果
+     * @param dto 検索条件
+     * @return ページング結果
      */
     Page<UserActionVO> pageUserActions(UserActionQueryDTO dto);
     
     /**
-     * 将UserAction实体转换为VO
+     * UserActionエンティティをVOに変換します
      *
-     * @param userAction 用户行为实体
-     * @return 用户行为VO
+     * @param userAction ユーザー行動エンティティ
+     * @return ユーザー行動VO
      */
     UserActionVO toVO(UserAction userAction);
     
     /**
-     * 批量删除用户行为记录
+     * ユーザー行動記録を一括削除します
      *
-     * @param ids 要删除的记录ID列表
-     * @return 是否成功
+     * @param ids 削除対象のレコードIDリスト
+     * @return 成功した場合はtrue
      */
     boolean batchDeleteActions(List<Long> ids);
     
     /**
-     * 批量删除当前用户的行为记录
+     * 現在のユーザーの行動記録を一括削除します
      *
-     * @param userId 用户ID
-     * @param ids 要删除的记录ID列表
-     * @return 是否成功
+     * @param userId ユーザーID
+     * @param ids 削除対象のレコードIDリスト
+     * @return 成功した場合はtrue
      */
     boolean batchDeleteMyActions(Long userId, List<Long> ids);
     
     /**
-     * 根据物品ID和行为类型统计行为数量
+     * アイテムIDとアクションタイプに基づいてアクション数を集計します
      *
-     * @param itemId 物品ID
-     * @param actionType 行为类型（0-浏览，1-购买）
-     * @return 行为数量
+     * @param itemId アイテムID
+     * @param actionType アクションタイプ（0-閲覧、1-購入）
+     * @return アクション件数
      */
     long getActionCountByItemIdAndType(Long itemId, int actionType);
-} 
+}

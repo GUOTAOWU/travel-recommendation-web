@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 聊天服务实现类
+ * チャットサービス実装クラス
  */
 @Service
 public class ChatServiceImpl implements ChatService {
@@ -37,7 +37,7 @@ public class ChatServiceImpl implements ChatService {
     private ChatMessageMapper chatMessageMapper;
     
     /**
-     * 创建聊天会话
+     * チャットセッションを作成する
      */
     @Override
     @Transactional
@@ -56,7 +56,7 @@ public class ChatServiceImpl implements ChatService {
     }
     
     /**
-     * 获取用户的所有聊天会话
+     * ユーザーのすべてのチャットセッションを取得する
      */
     @Override
     public List<ChatSessionVO> getUserSessions() {
@@ -64,20 +64,20 @@ public class ChatServiceImpl implements ChatService {
         
         List<ChatSession> sessions = chatSessionMapper.selectSessionsWithLatestMessage(userId);
         
-        // 使用Map进行去重，以会话ID为key
+        // セッションIDをキーとしてMapを使用し、重複を排除
         Map<Long, ChatSession> sessionMap = new HashMap<>();
         for (ChatSession session : sessions) {
             sessionMap.put(session.getId(), session);
         }
         
-        // 转换为有序列表
+        // ソートされたリストに変換
         return sessionMap.values().stream()
                 .map(this::convertToSessionVO)
                 .collect(Collectors.toList());
     }
     
     /**
-     * 获取聊天会话详情
+     * チャットセッションの詳細を取得する
      */
     @Override
     public ChatSessionVO getSessionById(Long sessionId) {
@@ -85,19 +85,19 @@ public class ChatServiceImpl implements ChatService {
         
         ChatSession session = chatSessionMapper.selectById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
-        // 检查权限
+        // 権限チェック
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权访问该会话");
+            throw new BusinessException("このセッションへのアクセス権限がありません");
         }
         
         return convertToSessionVO(session);
     }
     
     /**
-     * 更新聊天会话
+     * チャットセッションを更新する
      */
     @Override
     @Transactional
@@ -106,12 +106,12 @@ public class ChatServiceImpl implements ChatService {
         
         ChatSession session = chatSessionMapper.selectById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
-        // 检查权限
+        // 権限チェック
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权修改该会话");
+            throw new BusinessException("このセッションを修正する権限がありません");
         }
         
         session.setSessionName(dto.getSessionName());
@@ -123,7 +123,7 @@ public class ChatServiceImpl implements ChatService {
     }
     
     /**
-     * 删除聊天会话
+     * チャットセッションを削除する
      */
     @Override
     @Transactional
@@ -132,15 +132,15 @@ public class ChatServiceImpl implements ChatService {
         
         ChatSession session = chatSessionMapper.selectById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
-        // 检查权限
+        // 権限チェック
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权删除该会话");
+            throw new BusinessException("このセッションを削除する権限がありません");
         }
         
-        // 删除会话及其关联的所有消息
+        // セッションおよび関連するすべてのメッセージを削除
         chatSessionMapper.deleteById(sessionId);
         
         LambdaQueryWrapper<ChatMessage> wrapper = Wrappers.lambdaQuery();
@@ -149,20 +149,20 @@ public class ChatServiceImpl implements ChatService {
     }
     
     /**
-     * 获取会话中的所有消息
+     * セッション内のすべてのメッセージを取得する
      */
     @Override
     public List<ChatMessageVO> getSessionMessages(Long sessionId) {
         Long userId = SecurityUtils.getUserId();
         
-        // 验证会话存在且用户有权限访问
+        // セッションの存在確認およびアクセス権限の検証
         ChatSession session = chatSessionMapper.selectById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权访问该会话");
+            throw new BusinessException("このセッションへのアクセス権限がありません");
         }
         
         List<ChatMessage> messages = chatMessageMapper.selectMessagesBySessionId(sessionId);
@@ -173,24 +173,24 @@ public class ChatServiceImpl implements ChatService {
     }
     
     /**
-     * 发送消息
+     * メッセージを送信する
      */
     @Override
     @Transactional
     public ChatMessageVO sendMessage(ChatMessageDTO dto) {
         Long userId = SecurityUtils.getUserId();
         
-        // 验证会话存在且用户有权限访问
+        // セッションの存在確認およびアクセス権限の検証
         ChatSession session = chatSessionMapper.selectById(dto.getSessionId());
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权访问该会话");
+            throw new BusinessException("このセッションへのアクセス権限がありません");
         }
         
-        // 创建用户消息
+        // ユーザーメッセージの作成
         ChatMessage userMessage = new ChatMessage();
         userMessage.setSessionId(dto.getSessionId());
         userMessage.setRole("user");
@@ -201,26 +201,26 @@ public class ChatServiceImpl implements ChatService {
         
         chatMessageMapper.insert(userMessage);
         
-        // 更新会话的最后更新时间
+        // セッションの最終更新日時を更新
         session.setUpdateTime(LocalDateTime.now());
         chatSessionMapper.updateById(session);
         
-        // 创建AI助手回复消息（实际回复由前端通过调用算法服务获取）
+        // AIアシスタントの返信メッセージを作成（実際の返信内容はフロントエンドがアルゴリズムサービスを呼び出して取得）
         ChatMessage aiMessage = new ChatMessage();
         aiMessage.setSessionId(dto.getSessionId());
         aiMessage.setRole("assistant");
-        aiMessage.setContent(""); // 内容由前端填充
+        aiMessage.setContent(""); // 内容はフロントエンドで充填
         aiMessage.setModel(dto.getModel());
         aiMessage.setMessageTime(LocalDateTime.now());
         
         chatMessageMapper.insert(aiMessage);
         
-        // 返回AI消息，而不是用户消息，这样前端可以直接获取AI消息ID
+        // ユーザーメッセージではなくAIメッセージを返却することで、フロントエンドが直接AIメッセージIDを取得できるようにする
         return convertToMessageVO(aiMessage);
     }
     
     /**
-     * 获取消息详情
+     * メッセージの詳細を取得する
      */
     @Override
     public ChatMessageVO getMessageById(Long messageId) {
@@ -228,24 +228,24 @@ public class ChatServiceImpl implements ChatService {
         
         ChatMessage message = chatMessageMapper.selectById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            throw new BusinessException("メッセージが存在しません");
         }
         
-        // 验证会话存在且用户有权限访问
+        // セッションの存在確認およびアクセス権限の検証
         ChatSession session = chatSessionMapper.selectById(message.getSessionId());
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权访问该消息");
+            throw new BusinessException("このメッセージへのアクセス権限がありません");
         }
         
         return convertToMessageVO(message);
     }
     
     /**
-     * 删除消息
+     * メッセージを削除する
      */
     @Override
     @Transactional
@@ -254,78 +254,78 @@ public class ChatServiceImpl implements ChatService {
         
         ChatMessage message = chatMessageMapper.selectById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            throw new BusinessException("メッセージが存在しません");
         }
         
-        // 验证会话存在且用户有权限访问
+        // セッションの存在確認およびアクセス権限の検証
         ChatSession session = chatSessionMapper.selectById(message.getSessionId());
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权删除该消息");
+            throw new BusinessException("このメッセージを削除する権限がありません");
         }
         
-        // 删除消息
+        // メッセージを削除
         chatMessageMapper.deleteById(messageId);
     }
     
     /**
-     * 清除会话所有聊天记录
+     * セッション内のすべてのチャット記録を消去する
      */
     @Override
     @Transactional
     public void clearSessionMessages(Long sessionId) {
         Long userId = SecurityUtils.getUserId();
         
-        // 验证会话存在且用户有权限访问
+        // セッションの存在確認およびアクセス権限の検証
         ChatSession session = chatSessionMapper.selectById(sessionId);
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权访问该会话");
+            throw new BusinessException("このセッションへのアクセス権限がありません");
         }
         
-        // 删除会话中的所有消息
+        // セッション内のすべてのメッセージを削除
         LambdaQueryWrapper<ChatMessage> wrapper = Wrappers.lambdaQuery();
         wrapper.eq(ChatMessage::getSessionId, sessionId);
         chatMessageMapper.delete(wrapper);
     }
     
     /**
-     * 更新消息内容
+     * メッセージ内容を更新する
      */
     @Override
     public void updateMessageContent(Long messageId, String content) {
         Long userId = SecurityUtils.getUserId();
         
-        // 获取消息
+        // メッセージの取得
         ChatMessage message = chatMessageMapper.selectById(messageId);
         if (message == null) {
-            throw new BusinessException("消息不存在");
+            throw new BusinessException("メッセージが存在しません");
         }
         
-        // 获取消息所属的会话
+        // メッセージが属するセッションを取得
         ChatSession session = chatSessionMapper.selectById(message.getSessionId());
         if (session == null) {
-            throw new BusinessException("会话不存在");
+            throw new BusinessException("セッションが存在しません");
         }
         
-        // 验证用户权限
+        // ユーザー権限の検証
         if (!userId.equals(session.getUserId()) && !SecurityUtils.isAdmin()) {
-            throw new BusinessException("无权修改该消息");
+            throw new BusinessException("このメッセージを修正する権限がありません");
         }
         
-        // 更新消息内容
+        // メッセージ内容の更新
         message.setContent(content);
         chatMessageMapper.updateById(message);
     }
     
     /**
-     * 将实体对象转换为VO
+     * エンティティオブジェクトをVOに変換
      */
     private ChatSessionVO convertToSessionVO(ChatSession session) {
         if (session == null) {
@@ -339,7 +339,7 @@ public class ChatServiceImpl implements ChatService {
     }
     
     /**
-     * 将实体对象转换为VO
+     * エンティティオブジェクトをVOに変換
      */
     private ChatMessageVO convertToMessageVO(ChatMessage message) {
         if (message == null) {
@@ -351,4 +351,4 @@ public class ChatServiceImpl implements ChatService {
         
         return vo;
     }
-} 
+}

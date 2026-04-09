@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 用户行为记录实体类
+ * ユーザー行動記録エンティティクラス
  */
 @Data
 @TableName("user_action")
@@ -18,28 +18,28 @@ public class UserAction {
     private Long id;
 
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
 
     /**
-     * 景点ID
+     * 観光スポットID
      */
     private Long itemId;
 
     /**
-     * 行为类型(0:浏览 1:预约)
+     * アクションタイプ（0: 閲覧、1: 予約）
      */
     private Integer actionType;
 
     /**
-     * 扩展数据(JSON格式)
+     * 拡張データ（JSON形式）
      */
     private String extraData;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
-} 
+}

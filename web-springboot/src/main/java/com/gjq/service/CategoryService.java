@@ -10,60 +10,60 @@ import com.gjq.vo.category.CategoryVO;
 import java.util.List;
 
 /**
- * 类别服务接口
+ * カテゴリサービスインターフェース
  */
 public interface CategoryService {
 
     /**
-     * 添加类别
+     * カテゴリを追加します
      *
-     * @param dto 添加类别DTO
-     * @return 类别ID
+     * @param dto カテゴリ追加DTO
+     * @return カテゴリID
      */
     Long add(CategoryAddDTO dto);
 
     /**
-     * 更新类别
+     * カテゴリを更新します
      *
-     * @param dto 更新类别DTO
+     * @param dto カテゴリ更新DTO
      */
     void update(CategoryUpdateDTO dto);
 
     /**
-     * 删除类别
+     * カテゴリを削除します
      *
-     * @param id 类别ID
+     * @param id カテゴリID
      */
     void delete(Long id);
 
     /**
-     * 根据ID获取类别
+     * IDに基づいてカテゴリを取得します
      *
-     * @param id 类别ID
-     * @return 类别视图对象
+     * @param id カテゴリID
+     * @return カテゴリビューオブジェクト(VO)
      */
     CategoryVO getById(Long id);
 
     /**
-     * 获取类别列表
+     * カテゴリリストを取得します
      *
-     * @return 类别视图对象列表
+     * @return カテゴリビューオブジェクト(VO)のリスト
      */
     List<CategoryVO> list();
 
     /**
-     * 分页查询类别
+     * カテゴリをページング検索します
      *
-     * @param dto 查询类别DTO
-     * @return 分页类别视图对象
+     * @param dto カテゴリ検索DTO
+     * @return ページングされたカテゴリビューオブジェクト(VO)
      */
     Page<CategoryVO> page(CategoryQueryDTO dto);
 
     /**
-     * 实体转换为视图对象
+     * エンティティをビューオブジェクト(VO)に変換します
      *
-     * @param entity 类别实体
-     * @return 类别视图对象
+     * @param entity カテゴリエンティティ
+     * @return カテゴリビューオブジェクト(VO)
      */
     CategoryVO toVO(Category entity);
-} 
+}

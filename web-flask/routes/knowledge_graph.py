@@ -1,5 +1,5 @@
 """
-知识图谱路由
+知識グラフ（ナレッジグラフ）ルーティング
 """
 from flask import Blueprint, request
 from algo.knowledge_graph.data_sync import data_sync_service
@@ -12,10 +12,10 @@ knowledge_graph_bp = Blueprint('knowledge_graph', __name__, url_prefix='/api/kno
 @knowledge_graph_bp.route('/sync', methods=['POST'])
 def sync_data():
     """
-    同步数据到图数据库
+    グラフデータベースへのデータ同期
     
     Returns:
-        同步结果
+        同期結果
     """
     try:
         result = data_sync_service.sync_all_data()
@@ -23,35 +23,35 @@ def sync_data():
         if result.get("success"):
             return success(
                 data=result.get("statistics", {}),
-                msg=result.get("message", "数据同步成功")
+                msg=result.get("message", "データ同期に成功しました")
             )
         else:
             return error(
-                msg=result.get("message", "数据同步失败"),
+                msg=result.get("message", "データ同期に失敗しました"),
                 code=500
             )
             
     except Exception as e:
-        return error(f'数据同步失败: {str(e)}', code=500)
+        return error(f'データ同期に失敗しました: {str(e)}', code=500)
 
 @knowledge_graph_bp.route('/stats', methods=['GET'])
 def get_stats():
     """
-    获取图数据库统计信息
+    グラフデータベースの統計情報を取得
     
     Returns:
-        统计信息
+        統計情報
     """
     try:
         stats = neo4j_client.get_statistics()
         
-        # 添加统计数据的组织处理
+        # 統計データの組織化処理を追加
         result = {
             "nodes": {},
             "relationships": {}
         }
         
-        # 处理节点统计
+        # ノード統計の処理
         if "users" in stats:
             result["nodes"]["User"] = stats["users"]
         if "categories" in stats:
@@ -61,7 +61,7 @@ def get_stats():
         if "tags" in stats:
             result["nodes"]["Tag"] = stats["tags"]
             
-        # 处理关系统计
+        # リレーション統計の処理
         if "created" in stats:
             result["relationships"]["CREATED"] = stats["created"]
         if "belongs_to" in stats:
@@ -77,81 +77,81 @@ def get_stats():
         if "has_tag" in stats:
             result["relationships"]["HAS_TAG"] = stats["has_tag"]
             
-        return success(result, msg='获取统计信息成功')
+        return success(result, msg='統計情報の取得に成功しました')
     except Exception as e:
-        return error(f'获取统计信息失败: {str(e)}', code=500)
+        return error(f'統計情報の取得に失敗しました: {str(e)}', code=500)
 
 def serialize_neo4j_data(obj):
     """
-    递归序列化Neo4j数据，将DateTime等特殊对象转换为字符串
+    Neo4j データを再帰的にシリアライズし、DateTime などの特殊オブジェクトを文字列に変換する
     
     Args:
-        obj: 需要序列化的对象
+        obj: シリアライズ対象のオブジェクト
         
     Returns:
-        序列化后的对象
+        シリアライズ後のオブジェクト
     """
-    # 处理基本类型
+    # 基本型の処理
     if isinstance(obj, (str, int, float, bool, type(None))):
         return obj
     
-    # 处理DateTime对象
+    # DateTime オブジェクトの処理
     if hasattr(obj, 'isoformat'):
         return obj.isoformat()
     
-    # 处理字典
+    # 辞書の処理
     if isinstance(obj, dict):
         return {key: serialize_neo4j_data(value) for key, value in obj.items()}
     
-    # 处理列表
+    # リストの処理
     if isinstance(obj, list):
         return [serialize_neo4j_data(item) for item in obj]
     
-    # 处理其他可迭代对象
+    # その他の反復可能オブジェクトの処理
     if hasattr(obj, '__iter__'):
         try:
             return str(obj)
         except:
             return obj
     
-    # 其他情况直接转换为字符串
+    # その他の場合は直接文字列に変換
     return str(obj)
 
 @knowledge_graph_bp.route('/visualization', methods=['GET'])
 def get_visualization_data():
     """
-    获取知识图谱可视化数据
+    知識グラフの可視化データを取得
     
     Returns:
-        节点和边的数据，适用于图形可视化
+        ノードとエッジのデータ（グラフ可視化用）
     """
     try:
-        # 获取请求参数
+        # リクエストパラメータの取得
         limit = request.args.get('limit', default=300, type=int)
         
-        print(f"开始获取可视化数据，限制节点数: {limit}")
+        print(f"可視化データの取得を開始します。ノード制限数: {limit}")
         
-        # 获取所有节点
+        # すべてのノードを取得
         nodes_query = f"""
         MATCH (n)
         RETURN n
         LIMIT {limit}
         """
         
-        # 获取所有关系
+        # すべてのリレーションを取得
         relationships_query = f"""
         MATCH (n)-[r]->(m)
         RETURN n, r, m, type(r) as relType
         LIMIT {limit * 2}
         """
         
-        # 执行查询
+        # クエリの実行
         node_results = neo4j_client.execute_query_raw(nodes_query)
         rel_results = neo4j_client.execute_query_raw(relationships_query)
         
-        print(f"获取到 {len(node_results)} 个节点，{len(rel_results)} 个关系")
+        print(f"{len(node_results)} 個のノード、{len(rel_results)} 個のリレーションを取得しました")
         
-        # 处理节点数据
+        # ノードデータの処理
         nodes = {}
         for record in node_results:
             node = record['n']
@@ -162,16 +162,16 @@ def get_visualization_data():
             node_type = node_labels[0]
             node_id = f"{node_type}-{node['id']}"
             
-            # 确定节点显示名称
+            # ノード表示名の決定
             display_name = ""
             if node_type == 'User':
-                display_name = node.get('username', f"用户{node['id']}")
+                display_name = node.get('username', f"ユーザー{node['id']}")
             elif node_type == 'Item':
-                display_name = node.get('title', f"景点{node['id']}")
+                display_name = node.get('title', f"スポット{node['id']}")
             elif node_type == 'Category':
-                display_name = node.get('name', f"分类{node['id']}")
+                display_name = node.get('name', f"カテゴリ{node['id']}")
             elif node_type == 'Tag':
-                display_name = node.get('name', f"标签{node['id']}")
+                display_name = node.get('name', f"タグ{node['id']}")
             else:
                 display_name = f"{node_type}{node['id']}"
             
@@ -182,7 +182,7 @@ def get_visualization_data():
                 'properties': serialize_neo4j_data(dict(node))
             }
         
-        # 处理关系数据 - 按节点对分组并合并同类型边
+        # リレーションデータの処理 - ノードペアごとにグループ化し、同タイプのエッジを統合
         edge_groups = {}  # key: (source, target), value: list of edges
         
         for record in rel_results:
@@ -199,73 +199,73 @@ def get_visualization_data():
             source_id = f"{source_labels[0]}-{source_node['id']}"
             target_id = f"{target_labels[0]}-{target_node['id']}"
             
-            # 确保source和target节点都存在
+            # source と target ノードが両方存在することを確認
             if source_id not in nodes or target_id not in nodes:
                 continue
             
-            # 创建节点对的键
+            # ノードペアのキーを作成
             node_pair_key = (source_id, target_id)
             
             if node_pair_key not in edge_groups:
                 edge_groups[node_pair_key] = {}
             
-            # 按关系类型分组
+            # リレーションタイプごとにグループ化
             if rel_type not in edge_groups[node_pair_key]:
                 edge_groups[node_pair_key][rel_type] = 0
             edge_groups[node_pair_key][rel_type] += 1
         
-        # 生成最终的边数据 - 每个节点对只有一条边
+        # 最終的なエッジデータの生成 - 1つのノードペアにつき1つのエッジ
         edges = []
         for (source_id, target_id), rel_types in edge_groups.items():
-            # 计算这个节点对总共有多少条边
+            # このノードペアの合計エッジ数を計算
             total_count = sum(rel_types.values())
             
-            # 调试信息：输出节点对的边信息
-            print(f"节点对 {source_id} -> {target_id}: 总边数={total_count}, 关系类型={list(rel_types.keys())}")
+            # デバッグ情報：ノードペアのエッジ情報を出力
+            print(f"ノードペア {source_id} -> {target_id}: 合計エッジ数={total_count}, リレーションタイプ={list(rel_types.keys())}")
             
-            # 合并所有关系类型为一个标签 - 使用简洁美观的格式
+            # すべてのリレーションタイプを1つのラベルに統合
             if len(rel_types) == 1:
-                # 只有一种关系类型时，显示简洁格式
+                # リレーションタイプが1種類のみの場合
                 rel_type, count = list(rel_types.items())[0]
                 if rel_type == 'CREATED':
-                    chinese_label = "创建"
+                    japanese_label = "作成"
                 elif rel_type == 'BELONGS_TO':
-                    chinese_label = "属于"
+                    japanese_label = "所属"
                 elif rel_type == 'VIEWED':
-                    chinese_label = "浏览"
+                    japanese_label = "閲覧"
                 elif rel_type == 'PURCHASED':
-                    chinese_label = "预约"
+                    japanese_label = "予約"
                 elif rel_type == 'FAVORITED':
-                    chinese_label = "收藏"
+                    japanese_label = "お気に入り"
                 elif rel_type == 'LIKED':
-                    chinese_label = "点赞"
+                    japanese_label = "いいね"
                 elif rel_type == 'HAS_TAG':
-                    chinese_label = "标签"
+                    japanese_label = "タグ"
                 else:
-                    chinese_label = rel_type
+                    japanese_label = rel_type
                 
                 if count > 1:
-                    combined_label = f"{chinese_label} ×{count}"
+                    combined_label = f"{japanese_label} ×{count}"
                 else:
-                    combined_label = chinese_label
+                    combined_label = japanese_label
             else:
-                # 多种关系类型时，使用简洁的组合格式
+                # 複数のリレーションタイプがある場合
                 type_labels = []
                 for rel_type, count in rel_types.items():
                     if rel_type == 'CREATED':
-                        type_name = "创建"
+                        type_name = "作成"
                     elif rel_type == 'BELONGS_TO':
-                        type_name = "属于"
+                        type_name = "所属"
                     elif rel_type == 'VIEWED':
-                        type_name = "浏览"
+                        type_name = "閲覧"
                     elif rel_type == 'PURCHASED':
-                        type_name = "预约"
+                        type_name = "予約"
                     elif rel_type == 'FAVORITED':
-                        type_name = "收藏"
+                        type_name = "お気に入り"
                     elif rel_type == 'LIKED':
-                        type_name = "点赞"
+                        type_name = "いいね"
                     elif rel_type == 'HAS_TAG':
-                        type_name = "标签"
+                        type_name = "タグ"
                     else:
                         type_name = rel_type
                     
@@ -274,52 +274,51 @@ def get_visualization_data():
                     else:
                         type_labels.append(type_name)
                 
-                # 使用中文逗号分隔，更美观
                 combined_label = "、".join(type_labels)
             
-            print(f"  合并边: {combined_label}")
+            print(f"  エッジ統合: {combined_label}")
             
-            # 创建单一边，包含所有关系信息
+            # すべてのリレーション情報を含む単一のエッジを作成
             edges.append({
                 'id': f"edge-{source_id}-{target_id}",
                 'source': source_id,
                 'target': target_id,
                 'label': combined_label,
-                'types': list(rel_types.keys()),  # 包含的所有关系类型
-                'type_counts': rel_types,         # 每种类型的数量
-                'total_count': total_count,       # 总数量
+                'types': list(rel_types.keys()),  # 含まれるすべてのリレーションタイプ
+                'type_counts': rel_types,         # 各タイプの数量
+                'total_count': total_count,       # 合計数量
                 'group_key': f"{source_id}-{target_id}"
             })
         
-        # 构建返回数据
+        # レスポンスデータの構築
         visualization_data = {
             'nodes': list(nodes.values()),
             'edges': edges
         }
         
-        print(f"处理完成 - 节点: {len(nodes)}, 边: {len(edges)}")
+        print(f"処理完了 - ノード: {len(nodes)}, エッジ: {len(edges)}")
         
-        return success(visualization_data, msg='获取可视化数据成功')
+        return success(visualization_data, msg='可視化データの取得に成功しました')
         
     except Exception as e:
-        print(f"获取可视化数据失败: {str(e)}")
+        print(f"可視化データの取得に失敗しました: {str(e)}")
         import traceback
         traceback.print_exc()
-        return error(f'获取可视化数据失败: {str(e)}', code=500)
+        return error(f'可視化データの取得に失敗しました: {str(e)}', code=500)
 
 @knowledge_graph_bp.route('/user-profile/<int:user_id>', methods=['GET'])
 def get_user_profile(user_id):
     """
-    获取用户画像信息
+    ユーザープロファイル情報の取得
     
     Args:
-        user_id: 用户ID
+        user_id: ユーザーID
         
     Returns:
-        用户画像信息
+        ユーザープロファイル情報
     """
     try:
-        # 获取用户偏好的类别
+        # ユーザーが好むカテゴリを取得
         category_query = """
         MATCH (u:User {id: $userId})-[r:VIEWED|PURCHASED|FAVORITED|LIKED]->(i:Item)-[:BELONGS_TO]->(c:Category)
         WITH c, COUNT(r) AS interactionCount, COLLECT(DISTINCT TYPE(r)) AS interactionTypes
@@ -330,7 +329,7 @@ def get_user_profile(user_id):
         LIMIT 5
         """
         
-        # 获取用户交互最多的标签
+        # ユーザーが最も多くインタラクションしたタグを取得
         tag_query = """
         MATCH (u:User {id: $userId})-[r:VIEWED|PURCHASED|FAVORITED|LIKED]->(i:Item)
         WHERE i.tags IS NOT NULL
@@ -342,7 +341,7 @@ def get_user_profile(user_id):
         LIMIT 10
         """
         
-        # 获取用户活跃度统计
+        # ユーザーのアクティビティ統計を取得
         activity_query = """
         MATCH (u:User {id: $userId})-[r]->(i:Item)
         WITH TYPE(r) AS actionType, COUNT(r) AS actionCount
@@ -350,7 +349,7 @@ def get_user_profile(user_id):
         ORDER BY actionCount DESC
         """
         
-        # 获取用户的社交网络
+        # ユーザーのソーシャルネットワークを取得
         social_query = """
         MATCH (u1:User {id: $userId})-[r1:VIEWED|PURCHASED|FAVORITED|LIKED]->(i:Item)<-[r2:VIEWED|PURCHASED|FAVORITED|LIKED]-(u2:User)
         WHERE u1 <> u2
@@ -363,18 +362,18 @@ def get_user_profile(user_id):
         LIMIT 5
         """
         
-        # 执行查询
+        # クエリの実行
         categories = neo4j_client.execute_query(category_query, {"userId": user_id})
         tags = neo4j_client.execute_query(tag_query, {"userId": user_id})
         activities = neo4j_client.execute_query(activity_query, {"userId": user_id})
         similar_users = neo4j_client.execute_query(social_query, {"userId": user_id})
         
-        # 按活动类型整理活动统计
+        # アクティビティタイプ別のアクティビティ統計を整理
         activity_stats = {}
         for activity in activities:
             activity_stats[activity['actionType']] = activity['actionCount']
         
-        # 构建用户画像数据
+        # ユーザープロファイルデータの構築
         user_profile = {
             "preferred_categories": categories,
             "preferred_tags": tags,
@@ -382,6 +381,6 @@ def get_user_profile(user_id):
             "similar_users": similar_users
         }
         
-        return success(user_profile, msg='获取用户画像成功')
+        return success(user_profile, msg='ユーザープロファイルの取得に成功しました')
     except Exception as e:
-        return error(f'获取用户画像失败: {str(e)}', code=500) 
+        return error(f'ユーザープロファイルの取得に失敗しました: {str(e)}', code=500) 

@@ -3,13 +3,13 @@ package com.gjq.dto.chat;
 import lombok.Data;
 
 /**
- * 聊天会话数据传输对象
+ * チャットセッションデータ転送オブジェクト (DTO)
  */
 @Data
 public class ChatSessionDTO {
     
     /**
-     * 会话名称
+     * セッション名
      */
     private String sessionName;
-} 
+}

@@ -1,6 +1,6 @@
-// 景点相关的类型定义
+// 観光スポット関連の型定義
 
-// 类别实体
+// カテゴリエンティティ
 export interface Category {
   id: number;
   name: string;
@@ -12,7 +12,7 @@ export interface Category {
   updateTime: string;
 }
 
-// 类别添加DTO
+// カテゴリ追加用DTO
 export interface CategoryAddDTO {
   name: string;
   iconObjectKey: string;
@@ -20,7 +20,7 @@ export interface CategoryAddDTO {
   description: string;
 }
 
-// 类别更新DTO
+// カテゴリ更新用DTO
 export interface CategoryUpdateDTO {
   id: number;
   name?: string;
@@ -29,14 +29,14 @@ export interface CategoryUpdateDTO {
   description?: string;
 }
 
-// 类别查询DTO
+// カテゴリ検索用DTO
 export interface CategoryQueryDTO {
   name?: string;
   current?: number;
   size?: number;
 }
 
-// 类别VO
+// カテゴリVO
 export interface CategoryVO {
   id: number;
   name: string;
@@ -48,7 +48,7 @@ export interface CategoryVO {
   updateTime: string;
 }
 
-// 景点实体
+// 観光スポットエンティティ
 export interface Item {
   id: number;
   title: string;
@@ -66,7 +66,7 @@ export interface Item {
   updateTime: string;
 }
 
-// 景点添加DTO
+// 観光スポット追加用DTO
 export interface ItemAddDTO {
   title: string;
   description: string;
@@ -79,7 +79,7 @@ export interface ItemAddDTO {
   categoryId: number;
 }
 
-// 景点更新DTO
+// 観光スポット更新用DTO
 export interface ItemUpdateDTO {
   id: number;
   title?: string;
@@ -93,7 +93,7 @@ export interface ItemUpdateDTO {
   categoryId?: number;
 }
 
-// 景点查询DTO
+// 観光スポット検索用DTO
 export interface ItemQueryDTO {
   title?: string;
   categoryId?: number;
@@ -103,7 +103,7 @@ export interface ItemQueryDTO {
   size?: number;
 }
 
-// 景点VO
+// 観光スポットVO
 export interface ItemVO {
   id: number;
   title: string;
@@ -121,23 +121,23 @@ export interface ItemVO {
   userRealName?: string;
   createTime: string;
   updateTime: string;
-  // 统计数据(前端组织填充)
+  // 統計データ（フロントエンド側で補完）
   favorites?: number;
   views?: number;
 }
 
-// 推荐系统返回的景点VO
+// 推薦システムから返却される観光スポットVO
 export interface RecommendedItemVO extends Partial<ItemVO> {
   id: number;
   title: string;
   description: string;
   tags?: string[];
-  // 推荐系统可能返回的额外字段
+  // 推薦システムが返却する可能性のある追加フィールド
   categoryName?: string;
   score?: number;
   relationDiversity?: number;
   popularity?: number;
-  // 历史交互相关字段
-  interactionType?: string;  // 交互类型：VIEWED、PURCHASED、FAVORITED、LIKED
-  interactionLabel?: string; // 交互描述：您浏览过、您购买过等
-} 
+  // 履歴インタラクション関連フィールド
+  interactionType?: string;  // インタラクションタイプ：VIEWED、PURCHASED、FAVORITED、LIKED
+  interactionLabel?: string; // インタラクションの説明：閲覧済み、予約済みなど
+}

@@ -10,54 +10,54 @@ import com.gjq.vo.comment.CommentVO;
 import java.util.List;
 
 /**
- * 评论Service接口
+ * コメントサービスインターフェース
  */
 public interface CommentService extends IService<Comment> {
     
     /**
-     * 添加评论
+     * コメントを追加します
      *
-     * @param userId 用户ID
-     * @param commentAddDTO 评论添加DTO
-     * @return 评论ID
+     * @param userId ユーザーID
+     * @param commentAddDTO コメント追加DTO
+     * @return コメントID
      */
     Long addComment(Long userId, CommentAddDTO commentAddDTO);
     
     /**
-     * 删除评论（带权限检查）
-     * - 管理员可以删除任何评论
-     * - 物品发布者可以删除自己物品下的所有评论
-     * - 普通用户只能删除自己发布的评论
+     * コメントを削除します（権限チェック付き）
+     * - 管理者はすべてのコメントを削除可能
+     * - アイテムの投稿者は、自身のアイテムに紐付くすべてのコメントを削除可能
+     * - 一般ユーザーは、自身が投稿したコメントのみ削除可能
      *
-     * @param userId 用户ID
-     * @param commentId 评论ID
-     * @param isAdmin 是否为管理员
-     * @param itemCreatorId 物品创建者ID（如果当前用户是物品创建者则传入）
-     * @return 是否成功
+     * @param userId ユーザーID
+     * @param commentId コメントID
+     * @param isAdmin 管理者かどうか
+     * @param itemCreatorId アイテム作成者ID（現在のユーザーがアイテム作成者の場合に指定）
+     * @return 成功した場合はtrue
      */
     boolean deleteCommentWithPermissionCheck(Long userId, Long commentId, boolean isAdmin, Long itemCreatorId);
     
     /**
-     * 获取评论详情
+     * コメントの詳細を取得します
      *
-     * @param commentId 评论ID
-     * @return 评论VO
+     * @param commentId コメントID
+     * @return コメントVO
      */
     CommentVO getCommentById(Long commentId);
     
     /**
-     * 分页查询评论
+     * コメントをページング検索します
      *
-     * @param queryDTO 查询条件
-     * @return 评论VO分页
+     * @param queryDTO 検索条件
+     * @return ページングされたコメントVO
      */
     Page<CommentVO> pageComments(CommentQueryDTO queryDTO);
     
     /**
-     * 根据物品ID获取评论树（顶级评论及其回复）
+     * アイテムIDに基づいてコメントツリーを取得します（トップレベルコメントとその返信）
      *
-     * @param itemId 物品ID
-     * @return 评论VO列表（已构建成树形结构）
+     * @param itemId アイテムID
+     * @return コメントVOリスト（ツリー構造として構築済み）
      */
     List<CommentVO> getCommentTreeByItemId(Long itemId);
-} 
+}

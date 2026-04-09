@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 /**
- * 评论控制器
+ * コメントコントローラー
  */
 @RestController
 @RequestMapping("/comment")
@@ -34,10 +34,10 @@ public class CommentController {
     private ItemMapper itemMapper;
 
     /**
-     * 添加评论
+     * コメントを追加
      *
-     * @param commentAddDTO 评论添加DTO
-     * @return 结果
+     * @param commentAddDTO コメント追加DTO
+     * @return 実行結果
      */
     @PostMapping
     public Result<Long> addComment(@RequestBody @Valid CommentAddDTO commentAddDTO) {
@@ -47,23 +47,23 @@ public class CommentController {
     }
 
     /**
-     * 删除评论
+     * コメントを削除
      *
-     * @param commentId 评论ID
-     * @return 结果
+     * @param commentId コメントID
+     * @return 実行結果
      */
     @DeleteMapping("/{commentId}")
     public Result<?> deleteComment(@PathVariable Long commentId) {
-        // 获取当前用户ID
+        // 現在のユーザーIDを取得
         Long userId = SecurityUtils.getUserId();
         
-        // 获取评论信息
+        // コメント情報を取得
         Comment comment = commentMapper.selectById(commentId);
         if (comment == null) {
-            return Result.error("评论不存在");
+            return Result.error("コメントが存在しません");
         }
         
-        // 获取物品创建者ID
+        // アイテム作成者のIDを取得
         Long itemCreatorId = null;
         if (comment.getItemId() != null) {
             Item item = itemMapper.selectById(comment.getItemId());
@@ -72,20 +72,20 @@ public class CommentController {
             }
         }
         
-        // 执行带权限检查的删除
+        // 権限チェックを伴う削除を実行
         try {
             boolean success = commentService.deleteCommentWithPermissionCheck(userId, commentId, SecurityUtils.isAdmin(), itemCreatorId);
-            return success ? Result.success() : Result.error("删除失败");
+            return success ? Result.success() : Result.error("削除に失敗しました");
         } catch (Exception e) {
             return Result.error(e.getMessage());
         }
     }
 
     /**
-     * 获取评论详情
+     * コメント詳細を取得
      *
-     * @param commentId 评论ID
-     * @return 评论VO
+     * @param commentId コメントID
+     * @return コメントVO
      */
     @GetMapping("/{commentId}")
     public Result<CommentVO> getComment(@PathVariable Long commentId) {
@@ -94,10 +94,10 @@ public class CommentController {
     }
 
     /**
-     * 分页查询评论
+     * コメントをページング検索
      *
-     * @param queryDTO 查询条件
-     * @return 评论VO分页
+     * @param queryDTO 検索条件
+     * @return コメントVOのページングオブジェクト
      */
     @GetMapping("/page")
     public Result<Page<CommentVO>> pageComments(CommentQueryDTO queryDTO) {
@@ -106,14 +106,14 @@ public class CommentController {
     }
 
     /**
-     * 获取物品评论树
+     * アイテムのコメントツリーを取得
      *
-     * @param itemId 物品ID
-     * @return 评论VO列表（树形结构）
+     * @param itemId アイテムID
+     * @return コメントVOリスト（ツリー構造）
      */
     @GetMapping("/tree/{itemId}")
     public Result<List<CommentVO>> getCommentTree(@PathVariable Long itemId) {
         List<CommentVO> commentTree = commentService.getCommentTreeByItemId(itemId);
         return Result.success(commentTree);
     }
-} 
+}

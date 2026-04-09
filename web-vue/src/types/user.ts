@@ -1,4 +1,4 @@
-// 用户信息
+// ユーザー情報
 export interface UserInfo {
   id: number
   username: string
@@ -14,25 +14,25 @@ export interface UserInfo {
   updateTime?: string
 }
 
-// 登录响应
+// ログインレスポンス
 export interface LoginResponse {
   userInfo: UserInfo
   token: string
 }
 
-// 用户角色
+// ユーザーロール（権限）
 export enum UserRole {
-  USER = 0,
-  ADMIN = 1,
+  USER = 0,   // 一般ユーザー
+  ADMIN = 1,  // 管理者
 }
 
-// 用户状态
+// ユーザーステータス
 export enum UserStatus {
-  DISABLED = 0,
-  ENABLED = 1,
+  DISABLED = 0, // 無効
+  ENABLED = 1,  // 有効
 }
 
-// 用户列表查询参数
+// ユーザー一覧検索パラメータ
 export interface UserListParams {
   page: number
   size: number
@@ -44,13 +44,13 @@ export interface UserListParams {
   status?: number
 }
 
-// 用户列表响应
+// ユーザー一覧レスポンス
 export interface UserListResult {
   total: number
   list: UserInfo[]
 }
 
-// 添加用户参数
+// ユーザー追加パラメータ
 export interface AddUserParams {
   username: string
   password: string
@@ -61,7 +61,7 @@ export interface AddUserParams {
   status: number
 }
 
-// 更新用户参数
+// ユーザー更新パラメータ
 export interface UpdateUserParams {
   id: number
   username?: string
@@ -74,20 +74,20 @@ export interface UpdateUserParams {
   avatarObjectKey?: string
 }
 
-// 修改密码参数
+// パスワード変更パラメータ
 export interface UpdatePasswordParams {
   id: number
   oldPassword: string
   newPassword: string
 }
 
-// 登录参数
+// ログインパラメータ
 export interface LoginParams {
   username: string
   password: string
 }
 
-// 注册参数
+// 新規登録パラメータ
 export interface RegisterParams {
   username: string
   password: string
@@ -96,7 +96,7 @@ export interface RegisterParams {
   email: string
 }
 
-// 用户查询参数
+// ユーザー検索パラメータ
 export interface UserQueryParams {
   current: number
   size: number
@@ -108,7 +108,7 @@ export interface UserQueryParams {
   status?: number
 }
 
-// 用户表单数据
+// ユーザーフォームデータ
 export interface UserForm {
   id?: number
   username?: string
@@ -122,34 +122,36 @@ export interface UserForm {
   avatarObjectKey?: string
 }
 
-// 用户画像 - 类别偏好
+// --- ユーザープロファイル（ユーザー画像）関連 ---
+
+// ユーザープロファイル - カテゴリの好み
 export interface UserPreferredCategory {
   id: number
   name: string
-  count: number
-  types: string[]
-  diversityScore: number
+  count: number      // インタラクション回数
+  types: string[]    // 行動タイプ（閲覧、いいね等）
+  diversityScore: number // 多様性スコア
 }
 
-// 用户画像 - 标签偏好
+// ユーザープロファイル - タグの好み
 export interface UserPreferredTag {
   tag: string
   count: number
 }
 
-// 用户画像 - 相似用户
+// ユーザープロファイル - 似ているユーザー
 export interface SimilarUser {
   userId: number
   username: string
-  commonItems: number
+  commonItems: number // 共通の関心スポット数
   avatarBucket?: string
   avatarObjectKey?: string
 }
 
-// 用户画像数据
+// ユーザープロファイル（全体データ）
 export interface UserProfile {
-  preferred_categories: UserPreferredCategory[]
-  preferred_tags: UserPreferredTag[]
-  activity_stats: Record<string, number>
-  similar_users: SimilarUser[]
+  preferred_categories: UserPreferredCategory[] // お気に入りのカテゴリ
+  preferred_tags: UserPreferredTag[]           // お気に入りのタグ
+  activity_stats: Record<string, number>        // アクティビティ統計（行動タイプごとの回数）
+  similar_users: SimilarUser[]                  // 似ているユーザーリスト
 }

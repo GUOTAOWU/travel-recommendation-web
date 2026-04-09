@@ -7,7 +7,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 /**
- * 跨域配置
+ * CORS（クロスオリジンリソース共有）設定
  */
 @Configuration
 public class CorsConfig {
@@ -16,18 +16,25 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        // 允许跨域的源
+        
+        // クロスオリジンを許可するオリジン（ドメイン）の設定
         config.addAllowedOriginPattern("*");
-        // 允许跨域的请求头
+        
+        // 許可するリクエストヘッダーの設定
         config.addAllowedHeader("*");
-        // 允许跨域的请求方法
+        
+        // 許可するリクエストメソッド（GET, POSTなど）の設定
         config.addAllowedMethod("*");
-        // 允许携带cookie
+        
+        // 資格情報（Cookieなど）の送信を許可する
         config.setAllowCredentials(true);
-        // 暴露响应头
+        
+        // クライアント側に公開するレスポンスヘッダーの設定
         config.addExposedHeader("*");
-        // 配置所有接口都支持跨域
+        
+        // すべてのパス（エンドポイント）に対してCORS設定を登録
         source.registerCorsConfiguration("/**", config);
+        
         return new CorsFilter(source);
     }
-} 
+}

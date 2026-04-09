@@ -7,67 +7,67 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 评论VO
+ * コメントビューオブジェクト (VO)
  */
 @Data
 public class CommentVO {
     /**
-     * 评论ID
+     * コメントID
      */
     private Long id;
 
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long userId;
 
     /**
-     * 用户信息
+     * ユーザー情報
      */
     private UserInfo userInfo;
 
     /**
-     * 物品ID
+     * アイテムID
      */
     private Long itemId;
 
     /**
-     * 评论内容
+     * コメント内容
      */
     private String content;
 
     /**
-     * 父评论ID
+     * 親コメントID
      */
     private Long parentId;
     
     /**
-     * 被回复的评论ID
+     * 返信先のコメントID
      */
     private Long replyToCommentId;
     
     /**
-     * 被回复的用户ID
+     * 返信先のユーザーID
      */
     private Long replyToUserId;
     
     /**
-     * 被回复的用户信息
+     * 返信先のユーザー情報
      */
     private UserInfo replyToUserInfo;
 
     /**
-     * 回复列表
+     * 返信リスト
      */
     private List<CommentVO> replies;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     private LocalDateTime createTime;
 
     /**
-     * 更新时间
+     * 更新日時
      */
     private LocalDateTime updateTime;
-} 
+}

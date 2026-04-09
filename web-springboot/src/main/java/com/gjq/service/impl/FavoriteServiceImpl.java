@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 收藏Service实现
+ * お気に入りサービス実装クラス
  */
 @Service
 public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> implements FavoriteService {
@@ -31,12 +31,12 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
     @Override
     @Transactional
     public boolean addFavorite(Long userId, Long itemId) {
-        // 检查是否已收藏
+        // すでにお気に入り登録されているかチェック
         if (isFavorite(userId, itemId)) {
             return true;
         }
 
-        // 创建收藏记录
+        // お気に入り記録を作成
         Favorite favorite = new Favorite();
         favorite.setUserId(userId);
         favorite.setItemId(itemId);
@@ -46,34 +46,34 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
     @Override
     @Transactional
     public boolean removeFavorite(Long userId, Long itemId) {
-        // 构建查询条件
+        // 検索条件を構築
         LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Favorite::getUserId, userId)
                 .eq(Favorite::getItemId, itemId);
         
-        // 删除收藏记录
+        // お気に入り記録を削除
         return remove(queryWrapper);
     }
 
     @Override
     public boolean isFavorite(Long userId, Long itemId) {
-        // 构建查询条件
+        // 検索条件を構築
         LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Favorite::getUserId, userId)
                 .eq(Favorite::getItemId, itemId);
         
-        // 查询是否存在记录
+        // 記録が存在するか確認
         return count(queryWrapper) > 0;
     }
 
     @Override
     public List<Long> getUserFavoriteItemIds(Long userId) {
-        // 构建查询条件
+        // 検索条件を構築
         LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Favorite::getUserId, userId)
                 .select(Favorite::getItemId);
         
-        // 查询用户收藏的物品ID列表
+        // ユーザーがお気に入り登録したアイテムIDリストを取得
         return list(queryWrapper).stream()
                 .map(Favorite::getItemId)
                 .collect(Collectors.toList());
@@ -81,15 +81,15 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
 
     @Override
     public Page<FavoriteVO> getUserFavorites(Long userId, Page<Favorite> page) {
-        // 构建查询条件
+        // 検索条件を構築
         LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Favorite::getUserId, userId)
                 .orderByDesc(Favorite::getCreateTime);
         
-        // 查询收藏记录
+        // お気に入り記録を検索
         Page<Favorite> favoriteList = page(page, queryWrapper);
         
-        // 如果没有收藏记录，直接返回空页
+        // お気に入り記録がない場合は、空のページを返す
         if (favoriteList.getRecords().isEmpty()) {
             return new Page<FavoriteVO>()
                     .setRecords(new ArrayList<>())
@@ -98,37 +98,37 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
                     .setTotal(favoriteList.getTotal());
         }
         
-        // 构建VO并进行脏数据自愈处理
+        // VOの構築およびデータクリーンアップ（自己修復）処理
         List<FavoriteVO> voList = new ArrayList<>();
         
         for (Favorite favorite : favoriteList.getRecords()) {
             try {
-                // 查询景点详情
+                // スポットの詳細を取得
                 ItemVO itemVO = itemService.getById(favorite.getItemId());
                 
                 if (itemVO == null) {
-                    // 【核心修复与自愈逻辑】：景点已被删除（返回null），清理失效的收藏记录
+                    // 【コア修正・自己修復ロジック】：スポットが既に削除されている場合（null）、無効なお気に入り記録を削除
                     this.removeById(favorite.getId());
-                    continue; // 跳过该脏数据
+                    continue; // 無効なデータをスキップ
                 }
                 
-                // 正常组装数据
+                // 正常にデータを組み立て
                 FavoriteVO vo = new FavoriteVO();
                 BeanUtils.copyProperties(favorite, vo);
                 vo.setItem(itemVO);
                 voList.add(vo);
                 
             } catch (Exception e) {
-                // 【自愈逻辑】：应对 itemService.getById 内部抛出"物品不存在"异常的情况
+                // 【自己修復ロジック】：itemService.getById 内で「アイテムが存在しません」例外がスローされた場合の対応
                 this.removeById(favorite.getId());
-                continue; // 跳过该脏数据
+                continue; // 無効なデータをスキップ
             }
         }
         
-        // 构建分页结果
+        // 分ページ結果を構築
         Page<FavoriteVO> voPage = new Page<>();
         BeanUtils.copyProperties(favoriteList, voPage, "records");
-        // 将清洗后正常的记录放进去
+        // クリーンアップ後の正常な記録を格納
         voPage.setRecords(voList);
         
         return voPage;
@@ -136,11 +136,11 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
 
     @Override
     public long getFavoriteCount(Long itemId) {
-        // 构建查询条件
+        // 検索条件を構築
         LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Favorite::getItemId, itemId);
         
-        // 查询并返回收藏数量
+        // お気に入り数を取得して返す
         return count(queryWrapper);
     }
 }

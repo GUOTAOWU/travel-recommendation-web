@@ -2,43 +2,46 @@ import { request } from './request'
 import type { FavoriteDTO, FavoriteVO } from '@/types/favorite'
 import type { PageVO } from '@/types/common'
 
-// 收藏相关API
+/**
+ * お気に入り関連API
+ */
 export const favoriteApi = {
   /**
-   * 添加收藏
-   * @param data 收藏DTO
+   * お気に入りに追加します
+   * @param data お気に入りデータ（アイテムIDなど）
    */
   add: (data: FavoriteDTO) => {
     return request.post('/favorite', data)
   },
 
   /**
-   * 取消收藏
-   * @param itemId 景点ID
+   * お気に入りを取り消します
+   * @param itemId 観光スポット（アイテム）ID
    */
   remove: (itemId: number) => {
     return request.delete(`/favorite/${itemId}`)
   },
 
   /**
-   * 查询收藏状态
-   * @param itemId 景点ID
+   * お気に入り状態を確認します
+   * @param itemId 観光スポット（アイテム）ID
+   * @returns お気に入り登録済みの場合はtrue
    */
   status: (itemId: number) => {
     return request.get<boolean>(`/favorite/status/${itemId}`)
   },
 
   /**
-   * 获取用户收藏的景点ID列表
+   * ユーザーがお気に入り登録した全アイテムIDのリストを取得します
    */
   getUserFavoriteItemIds: () => {
     return request.get<number[]>('/favorite/user/items')
   },
 
   /**
-   * 分页获取用户收藏列表
-   * @param current 当前页
-   * @param size 每页大小
+   * ユーザーのお気に入り一覧をページング形式で取得します
+   * @param current 現在のページ番号
+   * @param size 1ページあたりの表示件数
    */
   page: (current: number = 1, size: number = 10) => {
     return request.get<PageVO<FavoriteVO>>('/favorite/user/page', {
@@ -47,10 +50,10 @@ export const favoriteApi = {
   },
 
   /**
-   * 获取景点收藏数
-   * @param itemId 景点ID
+   * アイテムごとの総お気に入り数を取得します
+   * @param itemId 観光スポット（アイテム）ID
    */
   getItemFavoriteCount: (itemId: number) => {
     return request.get<number>(`/favorite/count/${itemId}`)
   }
-} 
+}

@@ -6,50 +6,50 @@ import com.gjq.entity.Like;
 import java.util.List;
 
 /**
- * 点赞Service
+ * いいねサービス
  */
 public interface LikeService extends IService<Like> {
 
     /**
-     * 点赞
+     * いいねを登録します
      *
-     * @param userId 用户ID
-     * @param itemId 物品ID
-     * @return 是否成功
+     * @param userId ユーザーID
+     * @param itemId アイテムID
+     * @return 成功した場合はtrue
      */
     boolean like(Long userId, Long itemId);
 
     /**
-     * 取消点赞
+     * いいねを取り消します
      *
-     * @param userId 用户ID
-     * @param itemId 物品ID
-     * @return 是否成功
+     * @param userId ユーザーID
+     * @param itemId アイテムID
+     * @return 成功した場合はtrue
      */
     boolean unlike(Long userId, Long itemId);
 
     /**
-     * 查询用户是否点赞
+     * ユーザーがいいね済みかどうかを判定します
      *
-     * @param userId 用户ID
-     * @param itemId 物品ID
-     * @return 是否点赞
+     * @param userId ユーザーID
+     * @param itemId アイテムID
+     * @return いいね済みの場合はtrue
      */
     boolean isLiked(Long userId, Long itemId);
 
     /**
-     * 获取物品点赞数
+     * アイテムのいいね数を取得します
      *
-     * @param itemId 物品ID
-     * @return 点赞数
+     * @param itemId アイテムID
+     * @return いいね数
      */
     long getLikeCount(Long itemId);
 
     /**
-     * 获取用户点赞的物品ID列表
+     * ユーザーがいいねしたアイテムIDのリストを取得します
      *
-     * @param userId 用户ID
-     * @return 物品ID列表
+     * @param userId ユーザーID
+     * @return アイテムIDリスト
      */
     List<Long> getUserLikedItemIds(Long userId);
-} 
+}

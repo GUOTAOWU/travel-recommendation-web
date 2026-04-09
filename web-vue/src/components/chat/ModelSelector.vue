@@ -4,39 +4,39 @@ import { ElSelect, ElOption } from 'element-plus'
 import type { ChatModel } from '@/types/chat'
 import { llmApi } from '@/api/chat'
 
-// 组件属性
+// コンポーネントのプロパティ
 const props = defineProps<{
   modelValue: string
 }>()
 
-// 定义事件
+// イベントの定義
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
 
-// 创建本地计算属性用于v-model代替直接绑定到props
+// propsへ直接バインドする代わりに、v-model用のローカル算出プロパティを作成
 const localModelValue = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 })
 
-// 模型列表
+// モデルリスト
 const models = ref<ChatModel[]>([])
 const loading = ref(false)
 
-// 加载模型列表
+// モデルリストの読み込み
 const loadModels = async () => {
   try {
     loading.value = true
     models.value = await llmApi.getModels()
   } catch (error) {
-    console.error('加载模型列表失败:', error)
+    console.error('モデルリストの読み込みに失敗しました:', error)
   } finally {
     loading.value = false
   }
 }
 
-// 组件挂载时加载模型列表
+// コンポーネントのマウント時にモデルリストを読み込む
 onMounted(() => {
   loadModels()
 })
@@ -46,7 +46,7 @@ onMounted(() => {
   <div class="model-selector">
     <ElSelect 
       v-model="localModelValue" 
-      placeholder="选择模型" 
+      placeholder="モデルを選択" 
       :loading="loading"
       size="small"
       style="width: 180px"
@@ -77,4 +77,4 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-</style> 
+</style>

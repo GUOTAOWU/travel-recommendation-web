@@ -1,12 +1,12 @@
 import dayjs from 'dayjs'
 
-// 格式化日期时间
+// 日時をフォーマットする
 export function formatDateTime(date?: string) {
   if (!date) return '-'
   return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 }
 
-// 格式化日期
+// 日付をフォーマットする
 export const formatDate = (date: string | number | Date) => {
   const d = new Date(date)
   const year = d.getFullYear()
@@ -15,7 +15,7 @@ export const formatDate = (date: string | number | Date) => {
   return year + '-' + month + '-' + day
 }
 
-// 格式化文件大小
+// ファイルサイズをフォーマットする（B, KB, MB, GB）
 export const formatFileSize = (size: number) => {
   if (size < 1024) {
     return size + ' B'
@@ -28,8 +28,8 @@ export const formatFileSize = (size: number) => {
   }
 }
 
-// 格式化用户角色
+// ユーザー権限（ロール）をフォーマットする
 export const formatRole = (role: number) => {
-  const roles = ['普通用户', '管理员']
-  return roles[role] || '未知'
+  const roles = ['一般ユーザー', '管理者']
+  return roles[role] || '不明'
 }

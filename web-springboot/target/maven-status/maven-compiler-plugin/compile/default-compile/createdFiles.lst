@@ -88,7 +88,6 @@ com\gjq\mapper\ItemMapper.class
 com\gjq\vo\category\CategoryVO.class
 com\gjq\controller\UserController.class
 com\gjq\dto\user\UserUpdateDTO.class
-com\gjq\config\SwaggerConfig.class
 com\gjq\dto\user\UserAddDTO.class
 com\gjq\client\AlgorithmClient.class
 com\gjq\controller\ItemController.class

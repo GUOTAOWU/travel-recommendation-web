@@ -7,61 +7,66 @@ import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 
 /**
- * 用户信息
+ * ユーザー情報
  */
 @Data
 @NoArgsConstructor
 public class UserInfo {
     /**
-     * 用户ID
+     * ユーザーID
      */
     private Long id;
 
     /**
-     * 用户名
+     * ユーザー名
      */
     private String username;
 
     /**
-     * 真实姓名
+     * 本名
      */
     private String realName;
 
     /**
-     * 手机号
+     * 電話番号
      */
     private String phone;
 
     /**
-     * 邮箱
+     * メールアドレス
      */
     private String email;
 
     /**
-     * 头像桶 
+     * アバターのストレージバケット 
      */
     private String avatarBucket;
 
     /**
-     * 头像对象键
+     * アバターのオブジェクトキー
      */
     private String avatarObjectKey;
 
     /**
-     * 头像URL
+     * アバターのURL
      */
     private String avatarUrl;
 
     /**
-     * 角色(0:普通用户 1:管理员)
+     * ロール（0:一般ユーザー 1:管理者）
      */
     private Integer role;
 
     /**
-     * 状态(0:禁用 1:启用)
+     * ステータス（0:無効 1:有効）
      */
     private Integer status;
 
+    /**
+     * UserエンティティからUserInfoを構築するコンストラクタ
+     * * @param user エンティティ
+     * @param fileClient ファイルサービスクライアント（URL生成用）
+     */
     public UserInfo(User user, FileClient fileClient) {
         this.id = user.getId();
         this.username = user.getUsername();
@@ -70,10 +75,13 @@ public class UserInfo {
         this.email = user.getEmail();
         this.avatarBucket = user.getAvatarBucket();
         this.avatarObjectKey = user.getAvatarObjectKey();
+        
+        // バケット名とオブジェクトキーが存在する場合のみ、FileClientを使用してアクセス可能なURLを生成
         if (StringUtils.hasText(user.getAvatarBucket()) && StringUtils.hasText(user.getAvatarObjectKey())) {
             this.avatarUrl = fileClient.getFileUrl(user.getAvatarBucket(), user.getAvatarObjectKey());
         }
+        
         this.role = user.getRole();
         this.status = user.getStatus();
     }
-} 
+}

@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.LinkedHashMap;
 
 /**
- * 文件对象存储服务客户端
+ * ファイルオブジェクトストレージサービスクライアント
  */
 @Component
 public class FileClient {
@@ -30,7 +30,7 @@ public class FileClient {
     private String serverUrl;
 
     /**
-     * 通用响应格式
+     * 汎用レスポンス形式
      */
     public static class Response<T> {
         private int code;
@@ -63,7 +63,7 @@ public class FileClient {
     }
     
     /**
-     * 文件上传响应数据
+     * ファイルアップロードレスポンスデータ
      */
     public static class UploadResult {
         private String url;
@@ -96,23 +96,23 @@ public class FileClient {
     }
     
     /**
-     * 上传文件
+     * ファイルをアップロードする
      *
-     * @param bucket 存储桶名称
-     * @param file 文件
-     * @param isCache 是否缓存，默认false
-     * @return 上传结果
-     * @throws RuntimeException 上传失败时抛出异常
+     * @param bucket バケット名
+     * @param file ファイル
+     * @param isCache キャッシュするかどうか（デフォルト：false）
+     * @return アップロード結果
+     * @throws RuntimeException アップロード失敗時に例外をスロー
      */
     public UploadResult upload(String bucket, MultipartFile file, boolean isCache) {
         try {
             String url = serverUrl + "/upload/" + bucket;
             
-            // 设置请求头
+            // リクエストヘッダーの設定
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             
-            // 设置请求体
+            // リクエストボディの設定
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", new ByteArrayResource(file.getBytes()) {
                 @Override
@@ -122,7 +122,7 @@ public class FileClient {
             });
             body.add("is_cache", isCache);
             
-            // 发送请求
+            // リクエストの送信
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             @SuppressWarnings("unchecked")
             Response<LinkedHashMap<String, Object>> response = (Response<LinkedHashMap<String, Object>>) restTemplate.postForObject(
@@ -131,7 +131,7 @@ public class FileClient {
                 Response.class
             );
             
-            // 检查响应
+            // レスポンスの確認
             if (response != null && response.getCode() == 200 && response.getData() != null) {
                 LinkedHashMap<String, Object> data = response.getData();
                 UploadResult result = new UploadResult();
@@ -140,33 +140,33 @@ public class FileClient {
                 result.setObjectKey((String) data.get("objectKey"));
                 return result;
             }
-            throw new RuntimeException(response != null ? response.getMsg() : "上传失败");
+            throw new RuntimeException(response != null ? response.getMsg() : "アップロード失敗");
             
         } catch (Exception e) {
-            logger.error("上传文件失败", e);
-            throw new RuntimeException("上传文件失败: " + e.getMessage());
+            logger.error("ファイルのアップロードに失敗しました", e);
+            throw new RuntimeException("ファイルのアップロードに失敗しました: " + e.getMessage());
         }
     }
     
     /**
-     * 上传文件
+     * ファイルをアップロードする
      *
-     * @param bucket 存储桶名称
-     * @param fileContent 文件内容
-     * @param fileName 文件名
-     * @param isCache 是否缓存，默认false
-     * @return 上传结果
-     * @throws RuntimeException 上传失败时抛出异常
+     * @param bucket バケット名
+     * @param fileContent ファイル内容
+     * @param fileName ファイル名
+     * @param isCache キャッシュするかどうか（デフォルト：false）
+     * @return アップロード結果
+     * @throws RuntimeException アップロード失敗時に例外をスロー
      */
     public UploadResult upload(String bucket, byte[] fileContent, String fileName, boolean isCache) {
         try {
             String url = serverUrl + "/upload/" + bucket;
             
-            // 设置请求头
+            // リクエストヘッダーの設定
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             
-            // 设置请求体
+            // リクエストボディの設定
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", new ByteArrayResource(fileContent) {
                 @Override
@@ -176,7 +176,7 @@ public class FileClient {
             });
             body.add("is_cache", isCache);
             
-            // 发送请求
+            // リクエストの送信
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             @SuppressWarnings("unchecked")
             Response<LinkedHashMap<String, Object>> response = (Response<LinkedHashMap<String, Object>>) restTemplate.postForObject(
@@ -185,7 +185,7 @@ public class FileClient {
                 Response.class
             );
             
-            // 检查响应
+            // レスポンスの確認
             if (response != null && response.getCode() == 200 && response.getData() != null) {
                 LinkedHashMap<String, Object> data = response.getData();
                 UploadResult result = new UploadResult();
@@ -194,57 +194,57 @@ public class FileClient {
                 result.setObjectKey((String) data.get("objectKey"));
                 return result;
             }
-            throw new RuntimeException(response != null ? response.getMsg() : "上传失败");
+            throw new RuntimeException(response != null ? response.getMsg() : "アップロード失敗");
             
         } catch (Exception e) {
-            logger.error("上传文件失败", e);
-            throw new RuntimeException("上传文件失败: " + e.getMessage());
+            logger.error("ファイルのアップロードに失敗しました", e);
+            throw new RuntimeException("ファイルのアップロードに失敗しました: " + e.getMessage());
         }
     }
     
     /**
-     * 删除文件
+     * ファイルを削除する
      *
-     * @param bucket 存储桶名称
-     * @param objectKey 对象键
-     * @throws RuntimeException 删除失败时抛出异常
+     * @param bucket バケット名
+     * @param objectKey オブジェクトキー
+     * @throws RuntimeException 削除失敗時に例外をスロー
      */
     public void delete(String bucket, String objectKey) {
         String url = serverUrl + "/" + bucket + "/" + objectKey;
         Response<?> response = restTemplate.exchange(url, org.springframework.http.HttpMethod.DELETE, null, Response.class).getBody();
         
-        // 检查响应
+        // レスポンスの確認
         if (response == null || response.getCode() != 200) {
-            throw new RuntimeException(response != null ? response.getMsg() : "删除失败");
+            throw new RuntimeException(response != null ? response.getMsg() : "削除失敗");
         }
     }
     
     /**
-     * 获取文件
+     * ファイルを取得する
      *
-     * @param bucket 存储桶名称
-     * @param objectKey 对象键
-     * @return 文件字节数组
-     * @throws RuntimeException 获取失败时抛出异常
+     * @param bucket バケット名
+     * @param objectKey オブジェクトキー
+     * @return ファイルのバイト配列
+     * @throws RuntimeException 取得失敗時に例外をスロー
      */
     public byte[] get(String bucket, String objectKey) {
         try {
             String url = serverUrl + "/" + bucket + "/" + objectKey;
             return restTemplate.getForObject(url, byte[].class);
         } catch (Exception e) {
-            logger.error("获取文件失败", e);
-            throw new RuntimeException("获取文件失败: " + e.getMessage());
+            logger.error("ファイルの取得に失敗しました", e);
+            throw new RuntimeException("ファイルの取得に失敗しました: " + e.getMessage());
         }
     }
     
     /**
-     * 获取文件URL
+     * ファイルのURLを取得する
      *
-     * @param bucket 存储桶名称
-     * @param objectKey 对象键
-     * @return 文件URL
+     * @param bucket バケット名
+     * @param objectKey オブジェクトキー
+     * @return ファイルのURL
      */
     public String getFileUrl(String bucket, String objectKey) {
         return String.format("%s/%s/%s", serverUrl, bucket, objectKey);
     }
-} 
+}

@@ -3,28 +3,28 @@ package com.gjq.dto.chat;
 import lombok.Data;
 
 /**
- * 聊天消息数据传输对象
+ * チャットメッセージデータ転送オブジェクト (DTO)
  */
 @Data
 public class ChatMessageDTO {
     
     /**
-     * 会话ID
+     * セッションID
      */
     private Long sessionId;
     
     /**
-     * 消息内容
+     * メッセージ内容
      */
     private String content;
     
     /**
-     * 使用的模型名称
+     * 使用するモデル名
      */
     private String model;
     
     /**
-     * 额外数据，JSON格式，用于存储文件信息等
+     * 追加データ。JSON形式。ファイル情報などの保存に使用
      */
     private String extraData;
-} 
+}

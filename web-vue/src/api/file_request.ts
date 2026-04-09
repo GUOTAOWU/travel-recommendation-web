@@ -2,16 +2,17 @@ import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
 
-// 创建 axios 实例
+// axios インスタンスの作成
 const service: AxiosInstance = axios.create({
+  // 環境変数からファイルサーバーのURLを取得（例: http://localhost:5001/api/file）
   baseURL: import.meta.env.VITE_FILE_URL,
-  timeout: 60000,
+  timeout: 60000, // 60秒でタイムアウト設定
 })
 
-// 请求拦截器
+// リクエストインターセプター
 service.interceptors.request.use(
   (config) => {
-    // 从localStorage获取token
+    // localStorageからJWTトークンを取得してヘッダーにセット
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -23,10 +24,10 @@ service.interceptors.request.use(
   }
 )
 
-// 响应拦截器
+// レスポンスインターセプター
 service.interceptors.response.use(
   (response: AxiosResponse) => {
-    // 如果是二进制数据，直接返回
+    // レスポンスがバイナリデータ（Blob）の場合は、そのままデータを返す
     if (response.config.responseType === 'blob') {
       return response.data
     }
@@ -37,47 +38,50 @@ service.interceptors.response.use(
       return data
     }
 
-    ElMessage.error(msg || '请求失败')
-    return Promise.reject(new Error(msg || '请求失败'))
+    ElMessage.error(msg || 'リクエストに失敗しました')
+    return Promise.reject(new Error(msg || 'リクエストに失敗しました'))
   },
   (error) => {
-    // 处理文件下载失败的情况
+    // ファイルダウンロード失敗時の特殊なハンドリング
+    // responseTypeが'blob'の場合、エラー内容もBlobとして返ってくるため、FileReaderでテキスト化して読み取る
     if (error.config?.responseType === 'blob' && error.response?.data) {
-      // 尝试读取blob中的错误信息
       return new Promise((_, reject) => {
         const reader = new FileReader()
         reader.onload = () => {
           try {
+            // Blobの中身をJSONとして解析し、サーバーからのエラーメッセージを表示
             const errorData = JSON.parse(reader.result as string)
-            ElMessage.error(errorData.msg || '下载失败')
-            reject(new Error(errorData.msg || '下载失败'))
+            ElMessage.error(errorData.msg || 'ダウンロードに失敗しました')
+            reject(new Error(errorData.msg || 'ダウンロードに失敗しました'))
           } catch (e) {
-            ElMessage.error('下载失败')
-            reject(new Error('下载失败'))
+            ElMessage.error('ダウンロードに失敗しました')
+            reject(new Error('ダウンロードに失敗しました'))
           }
         }
         reader.onerror = () => {
-          ElMessage.error('下载失败')
-          reject(new Error('下载失败'))
+          ElMessage.error('ダウンロードに失敗しました')
+          reject(new Error('ダウンロードに失敗しました'))
         }
         reader.readAsText(error.response.data)
       })
     }
     
-    ElMessage.error(error.message || '请求失败')
+    ElMessage.error(error.message || 'リクエストに失敗しました')
     return Promise.reject(error)
   }
 )
 
-// 封装请求方法
+/**
+ * ファイル操作用リクエストメソッド群
+ */
 const fileRequest = {
   /**
-   * 上传文件
-   * @param bucket 存储桶名称
-   * @param file 文件对象
-   * @param isCache 是否为缓存文件
-   * @param config 额外的请求配置
-   * @returns { url: string, bucket: string, objectKey: string }
+   * ファイルをアップロードします
+   * @param bucket ストレージバケット名
+   * @param file ファイルオブジェクト
+   * @param isCache キャッシュファイルとして扱うかどうか
+   * @param config 追加のAxios設定
+   * @returns { url: string, bucket: string, objectKey: string } アップロード成功後の情報
    */
   upload<T = { url: string, bucket: string, objectKey: string }>(bucket: string, file: File, isCache?: boolean, config?: AxiosRequestConfig): Promise<T> {
     const formData = new FormData()
@@ -87,42 +91,41 @@ const fileRequest = {
     }
     return service.post(`/file/upload/${bucket}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'multipart/form-data', // マルチパート形式で送信
       },
       ...config,
     })
   },
 
   /**
-   * 获取文件
-   * @param bucket 存储桶名称
-   * @param objectKey 文件名
-   * @param config 额外的请求配置
-   * @returns 返回文件内容
+   * ファイルを取得（ダウンロード）します
+   * @param bucket ストレージバケット名
+   * @param objectKey ファイル名（オブジェクトキー）
+   * @param config 追加のAxios設定
+   * @returns ファイル内容（Blob）
    */
   get(bucket: string, objectKey: string, config?: AxiosRequestConfig): Promise<Blob> {
     return service.get(`/file/${bucket}/${objectKey}`, {
-      responseType: 'blob',
+      responseType: 'blob', // バイナリデータとして受け取る
       ...config,
     })
   },
 
   /**
-   * 删除文件
-   * @param bucket 存储桶名称
-   * @param objectKey 文件名
-   * @param config 额外的请求配置
-   * @returns 返回响应数据
+   * ファイルを削除します
+   * @param bucket ストレージバケット名
+   * @param objectKey ファイル名（オブジェクトキー）
+   * @param config 追加のAxios設定
    */
   delete<T = any>(bucket: string, objectKey: string, config?: AxiosRequestConfig): Promise<T> {
     return service.delete(`/file/${bucket}/${objectKey}`, config)
   },
 
   /**
-   * 获取文件URL
-   * @param bucket 存储桶名称
-   * @param objectKey 文件名
-   * @returns 返回文件访问URL
+   * ファイルのアクセスURLを取得します（フロントエンドでの表示用）
+   * @param bucket ストレージバケット名
+   * @param objectKey ファイル名（オブジェクトキー）
+   * @returns ファイルのフルURL
    */
   getFileUrl(bucket: string, objectKey: string): string {
     return `${import.meta.env.VITE_FILE_URL}/file/${bucket}/${objectKey}`

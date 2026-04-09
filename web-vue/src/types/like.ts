@@ -1,6 +1,6 @@
-// 点赞相关的类型定义
+// いいね（点賛）関連の型定義
 
-// 点赞实体
+// いいねエンティティ
 export interface Like {
   id: number;
   userId: number;
@@ -8,21 +8,21 @@ export interface Like {
   createTime: string;
 }
 
-// 点赞DTO
+// いいねDTO（データ転送オブジェクト）
 export interface LikeDTO {
   itemId: number;
 }
 
-// 点赞状态响应
+// いいね状態レスポンス
 export interface LikeStatusResponse {
   isLiked: boolean;
   count: number;
 }
 
-// 批量点赞状态响应
+// いいね状態の一括レスポンス
 export interface BatchLikeStatusResponse {
   [itemId: number]: {
     isLiked: boolean;
     count: number;
   };
-} 
+}

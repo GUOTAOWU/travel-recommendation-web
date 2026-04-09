@@ -6,76 +6,76 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 通用景点实体类
+ * 観光スポットエンティティクラス
  */
 @Data
 @TableName("item")
 public class Item {
     /**
-     * 景点ID
+     * スポットID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 景点名称
+     * スポット名称
      */
     private String title;
 
     /**
-     * 景点描述
+     * スポット説明
      */
     private String description;
 
     /**
-     * 类别ID
+     * カテゴリID
      */
     private Long categoryId;
 
     /**
-     * 用户ID（创建者）
+     * ユーザーID（作成者）
      */
     private Long userId;
 
     /**
-     * 封面图片存储桶
+     * カバー画像のバケット名
      */
     private String coverBucket;
 
     /**
-     * 封面图片对象键
+     * カバー画像のオブジェクトキー
      */
     private String coverObjectKey;
 
     /**
-     * 文件存储桶（用于存储视频、音频或其他文件）
+     * ファイルのバケット名（動画、音声、その他のファイル保存用）
      */
     private String fileBucket;
 
     /**
-     * 文件对象键（用于存储视频、音频或其他文件）
+     * ファイルのオブジェクトキー（動画、音声、その他のファイル保存用）
      */
     private String fileObjectKey;
 
     /**
-     * 标签，使用逗号分隔
+     * タグ（カンマ区切り）
      */
     private String tags;
 
     /**
-     * 额外数据，JSON格式，用于存储未来可能添加的字段
+     * 追加データ（JSON形式）。将来的に追加される可能性のあるフィールドの保存に使用
      */
     private String extraData;
 
     /**
-     * 创建时间
+     * 作成日時
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
-     * 更新时间
+     * 更新日時
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-} 
+}

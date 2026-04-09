@@ -1,45 +1,45 @@
-// 聊天模型定义
+// チャットモデルの定義
 export interface ChatModel {
   key: string;
   name: string;
 }
 
-// 聊天角色定义
+// チャットロール（役割）の定義
 export type ChatRole = 'user' | 'assistant';
 
-// 聊天消息定义
+// チャットメッセージの定義
 export interface ChatMessage {
   id?: number;
   sessionId?: number;
   role: ChatRole;
   content: string;
   model?: string;
-  extraData?: string; // JSON 格式的额外数据
+  extraData?: string; // JSON 形式の追加データ
   messageTime?: string;
 }
 
-// 聊天会话定义
+// チャットセッションの定義
 export interface ChatSession {
   id: number;
   userId: number;
   sessionName: string;
   createTime: string;
   updateTime: string;
-  latestMessage?: string; // 最新消息的预览
+  latestMessage?: string; // 最新メッセージのプレビュー
 }
 
-// 创建会话请求参数
+// セッション作成リクエストのパラメータ
 export interface ChatSessionCreateDTO {
   sessionName: string;
 }
 
-// 更新会话请求参数
+// セッション更新リクエストのパラメータ
 export interface ChatSessionUpdateDTO {
   id: number;
   sessionName: string;
 }
 
-// 发送消息请求参数
+// メッセージ送信リクエストのパラメータ
 export interface ChatMessageSendDTO {
   sessionId: number;
   content: string;
@@ -47,7 +47,7 @@ export interface ChatMessageSendDTO {
   extraData?: string;
 }
 
-// 查询消息请求参数
+// メッセージ照会リクエストのパラメータ
 export interface ChatMessageQueryDTO {
   sessionId: number;
-} 
+}

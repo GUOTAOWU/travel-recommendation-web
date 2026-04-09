@@ -5,38 +5,38 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 用户查询DTO
+ * ユーザー検索DTO
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class UserQueryDTO extends PageDTO {
     /**
-     * 用户名
+     * ユーザー名
      */
     private String username;
 
     /**
-     * 真实姓名
+     * 氏名
      */
     private String realName;
 
     /**
-     * 手机号
+     * 電話番号
      */
     private String phone;
 
     /**
-     * 邮箱
+     * メールアドレス
      */
     private String email;
 
     /**
-     * 角色(0:普通用户 1:管理员)
+     * ロール（0: 一般ユーザー、1: 管理者）
      */
     private Integer role;
 
     /**
-     * 状态(0:禁用 1:启用)
+     * ステータス（0: 無効、1: 有効）
      */
     private Integer status;
-} 
+}

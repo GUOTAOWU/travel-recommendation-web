@@ -1,5 +1,5 @@
 """
-数据同步服务 - 从MySQL同步数据到Neo4j
+データ同期サービス - MySQLからNeo4jへデータを同期する
 """
 import logging
 from typing import List, Dict, Any
@@ -10,7 +10,7 @@ from algo.knowledge_graph.tag_extractor import tag_extractor_service
 logger = logging.getLogger(__name__)
 
 class DataSyncService:
-    """数据同步服务"""
+    """データ同期サービス"""
     
     def __init__(self):
         self.data_client = kg_data_client
@@ -18,71 +18,71 @@ class DataSyncService:
     
     def sync_all_data(self) -> Dict[str, Any]:
         """
-        同步所有数据到图数据库
+        すべてのデータをグラフデータベースに同期する
         
         Returns:
-            同步结果统计
+            同期結果の統計情報
         """
         try:
-            logger.info("开始同步数据到图数据库")
+            logger.info("グラフデータベースへのデータ同期を開始します")
             
-            # 1. 清空图数据库
+            # 1. グラフデータベースをクリア
             self.neo4j_client.clear_database()
             
-            # 2. 创建约束和索引
+            # 2. 制約とインデックスを作成
             self.neo4j_client.create_constraints()
             
-            # 3. 获取并同步用户数据
+            # 3. ユーザーデータを取得して同期
             users = self.data_client.get_all_users()
             if users:
                 self.neo4j_client.create_user_nodes(users)
             
-            # 4. 获取并同步类别数据
+            # 4. カテゴリデータを取得して同期
             categories = self.data_client.get_all_categories()
             if categories:
                 self.neo4j_client.create_category_nodes(categories)
             
-            # 5. 获取并同步物品数据
+            # 5. アイテムデータを取得して同期
             items = self.data_client.get_all_items()
             if items:
                 self.neo4j_client.create_item_nodes(items)
             
-            # 6. 创建标签和关系
+            # 6. タグとリレーションシップを作成
             tags, tag_relationships = self._build_tags_and_relationships(items, categories)
             if tags:
                 self.neo4j_client.create_tag_nodes(tags)
             
-            # 7. 创建关系
+            # 7. リレーションシップを作成
             relationships = self._build_relationships(users, categories, items)
             if tag_relationships:
                 relationships.extend(tag_relationships)
             if relationships:
                 self.neo4j_client.create_relationships(relationships)
             
-            # 8. 获取统计信息
+            # 8. 統計情報を取得
             stats = self.neo4j_client.get_statistics()
             
-            logger.info("数据同步完成")
+            logger.info("データ同期が完了しました")
             return {
                 "success": True,
-                "message": f"同步完成！用户: {stats.get('users', 0)}, 类别: {stats.get('categories', 0)}, 物品: {stats.get('items', 0)}, 标签: {stats.get('tags', 0)}",
+                "message": f"同期完了！ユーザー: {stats.get('users', 0)}, カテゴリ: {stats.get('categories', 0)}, アイテム: {stats.get('items', 0)}, タグ: {stats.get('tags', 0)}",
                 "statistics": stats
             }
             
         except Exception as e:
-            logger.error(f"数据同步失败: {str(e)}")
+            logger.error(f"データ同期に失敗しました: {str(e)}")
             return {
                 "success": False,
-                "message": f"同步失败: {str(e)}",
+                "message": f"同期失敗: {str(e)}",
                 "statistics": {}
             }
     
     def _build_relationships(self, users: List[Dict], categories: List[Dict], items: List[Dict]) -> List[Dict]:
-        """构建关系数据"""
+        """リレーションシップデータを構築する"""
         relationships = []
         
         try:
-            # 1. 用户创建物品关系
+            # 1. ユーザーがアイテムを作成したリレーションシップ
             for item in items:
                 relationships.append({
                     "type": "CREATED",
@@ -91,7 +91,7 @@ class DataSyncService:
                     "createTime": item.get("createTime")
                 })
             
-            # 2. 物品属于类别关系
+            # 2. アイテムがカテゴリに属するリレーションシップ
             for item in items:
                 relationships.append({
                     "type": "BELONGS_TO",
@@ -99,11 +99,11 @@ class DataSyncService:
                     "categoryId": item.get("categoryId")
                 })
             
-            # 3. 获取用户行为关系
+            # 3. ユーザー行動リレーションシップを取得
             user_actions = self.data_client.get_all_user_actions()
             for action in user_actions:
                 action_type = action.get("actionType")
-                if action_type == 0:  # 浏览
+                if action_type == 0:  # 閲覧
                     relationships.append({
                         "type": "VIEWED",
                         "userId": action.get("userId"),
@@ -111,7 +111,7 @@ class DataSyncService:
                         "createTime": action.get("createTime"),
                         "extraData": action.get("extraData")
                     })
-                elif action_type == 1:  # 购买
+                elif action_type == 1:  # 購入
                     relationships.append({
                         "type": "PURCHASED",
                         "userId": action.get("userId"),
@@ -120,7 +120,7 @@ class DataSyncService:
                         "extraData": action.get("extraData")
                     })
             
-            # 4. 获取收藏关系
+            # 4. お気に入りリレーションシップを取得
             favorites = self.data_client.get_all_favorites()
             for favorite in favorites:
                 relationships.append({
@@ -130,7 +130,7 @@ class DataSyncService:
                     "createTime": favorite.get("createTime")
                 })
             
-            # 5. 获取点赞关系
+            # 5. いいねリレーションシップを取得
             likes = self.data_client.get_all_likes()
             for like in likes:
                 relationships.append({
@@ -140,46 +140,40 @@ class DataSyncService:
                     "createTime": like.get("createTime")
                 })
             
-            logger.info(f"构建了 {len(relationships)} 个关系")
+            logger.info(f"{len(relationships)} 件のリレーションシップを構築しました")
             return relationships
             
         except Exception as e:
-            logger.error(f"构建关系失败: {str(e)}")
+            logger.error(f"リレーションシップの構築に失敗しました: {str(e)}")
             return []
     
     def _build_tags_and_relationships(self, items: List[Dict], categories: List[Dict]) -> tuple[List[Dict], List[Dict]]:
-        """构建标签数据和关系"""
+        """タグデータとリレーションシップを構築する"""
         try:
-            # 创建类别ID到类别信息的映射
-            category_map = {cat['id']: cat for cat in categories}
+            logger.info("开始使用数据库原生标签数据，跳过LLM提取...")
             
-            # 准备景点数据用于标签抽取
-            attractions_for_extraction = []
+            # 直接通过拆分数据库原生 tags 字段来构建 tag_mappings
+            tag_mappings = {}
             for item in items:
-                category = category_map.get(item.get('categoryId'))
-                if category:
-                    attractions_for_extraction.append({
-                        'id': item.get('id'),
-                        'title': item.get('title', ''),
-                        'description': item.get('description', ''),
-                        'category_name': category.get('name', ''),
-                        'category_description': category.get('description', ''),
-                        'tags': item.get('tags', '')
-                    })
+                item_id = item.get('id')
+                tags_str = item.get('tags', '')
+                
+                if tags_str:
+                    # 按照逗号分割，并去掉首尾多余空格
+                    tag_list = [t.strip() for t in tags_str.split(',') if t.strip()]
+                    tag_mappings[item_id] = tag_list
+                else:
+                    tag_mappings[item_id] = []
             
-            # 使用LLM批量抽取标签
-            logger.info(f"开始为 {len(attractions_for_extraction)} 个景点抽取标签")
-            tag_mappings = tag_extractor_service.extract_tags_batch(attractions_for_extraction)
-            
-            # 创建标签节点和关系数据
+            # タグノードとリレーションシップデータを作成 (直接传给创建节点的方法)
             tag_nodes, tag_relationships = tag_extractor_service.create_tag_nodes_data(tag_mappings)
             
-            logger.info(f"成功创建 {len(tag_nodes)} 个标签节点和 {len(tag_relationships)} 个标签关系")
+            logger.info(f"{len(tag_nodes)} 件のタグノードと {len(tag_relationships)} 件のタグリレーションシップを作成しました")
             return tag_nodes, tag_relationships
             
         except Exception as e:
-            logger.error(f"构建标签和关系失败: {str(e)}")
+            logger.error(f"タグとリレーションシップの構築に失敗しました: {str(e)}")
             return [], []
 
-# 创建全局实例
-data_sync_service = DataSyncService() 
+# グローバルインスタンスを作成
+data_sync_service = DataSyncService()

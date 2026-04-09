@@ -3,7 +3,7 @@ package com.gjq.common;
 import lombok.Data;
 
 /**
- * 通用返回结果
+ * 共通レスポンス形式
  */
 @Data
 public class Result<T> {
@@ -18,7 +18,7 @@ public class Result<T> {
     public static <T> Result<T> success(T data) {
         Result<T> result = new Result<>();
         result.setCode(200);
-        result.setMsg("操作成功");
+        result.setMsg("操作に成功しました");
         result.setData(data);
         return result;
     }
@@ -33,5 +33,4 @@ public class Result<T> {
         result.setMsg(message);
         return result;
     }
-} 
- 
+}

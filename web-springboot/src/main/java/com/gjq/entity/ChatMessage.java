@@ -8,45 +8,45 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 聊天消息实体类
+ * チャットメッセージエンティティクラス
  */
 @Data
 @TableName("chat_message")
 public class ChatMessage {
     
     /**
-     * 消息ID
+     * メッセージID
      */
     @TableId(type = IdType.AUTO)
     private Long id;
     
     /**
-     * 会话ID
+     * セッションID
      */
     private Long sessionId;
     
     /**
-     * 角色（user/assistant）
+     * ロール（user / assistant）
      */
     private String role;
     
     /**
-     * 消息内容
+     * メッセージ内容
      */
     private String content;
     
     /**
-     * 使用的模型名称
+     * 使用モデル名
      */
     private String model;
     
     /**
-     * 额外数据，JSON格式，用于存储文件信息等
+     * 追加データ（JSON形式）。ファイル情報などの保存に使用
      */
     private String extraData;
     
     /**
-     * 消息时间
+     * メッセージ日時
      */
     private LocalDateTime messageTime;
-} 
+}

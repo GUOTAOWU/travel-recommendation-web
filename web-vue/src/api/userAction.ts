@@ -1,16 +1,16 @@
 import { request } from '@/api/request'
 
 /**
- * 用户行为数据接口
+ * ユーザー行動データインターフェース
  */
 export interface UserActionData {
   itemId: number;
-  actionType: number; // 0:浏览 1:预约
+  actionType: number; // 0:閲覧 1:予約
   extraData?: string;
 }
 
 /**
- * 用户行为查询参数接口
+ * ユーザー行動検索パラメータインターフェース
  */
 export interface UserActionQueryParams {
   current: number;
@@ -23,7 +23,7 @@ export interface UserActionQueryParams {
 }
 
 /**
- * 用户行为返回数据接口
+ * ユーザー行動レスポンスデータインターフェース
  */
 export interface UserActionResponse {
   records: any[];
@@ -34,8 +34,8 @@ export interface UserActionResponse {
 }
 
 /**
- * 添加用户行为记录（浏览/预约）
- * @param data 用户行为数据
+ * ユーザー行動記録を追加（閲覧/予約）
+ * @param data ユーザー行動データ
  * @returns Promise
  */
 export function addUserAction(data: UserActionData): Promise<boolean> {
@@ -43,8 +43,8 @@ export function addUserAction(data: UserActionData): Promise<boolean> {
 }
 
 /**
- * 分页查询当前用户的行为记录
- * @param params 查询参数
+ * 現在のユーザーの行動記録をページング検索
+ * @param params 検索パラメータ
  * @returns Promise
  */
 export function pageMyActions(params: UserActionQueryParams): Promise<UserActionResponse> {
@@ -52,8 +52,8 @@ export function pageMyActions(params: UserActionQueryParams): Promise<UserAction
 }
 
 /**
- * 分页查询所有用户的行为记录（管理员接口）
- * @param params 查询参数
+ * すべてのユーザーの行動記録をページング検索（管理者インターフェース）
+ * @param params 検索パラメータ
  * @returns Promise
  */
 export function pageAllActions(params: UserActionQueryParams): Promise<UserActionResponse> {
@@ -61,8 +61,8 @@ export function pageAllActions(params: UserActionQueryParams): Promise<UserActio
 }
 
 /**
- * 批量删除用户行为记录（管理员接口）
- * @param ids 记录ID列表
+ * ユーザー行動記録を一括削除（管理者インターフェース）
+ * @param ids 記録IDリスト
  * @returns Promise
  */
 export function batchDeleteActions(ids: number[]): Promise<boolean> {
@@ -70,8 +70,8 @@ export function batchDeleteActions(ids: number[]): Promise<boolean> {
 }
 
 /**
- * 批量删除当前用户的行为记录
- * @param ids 记录ID列表
+ * 現在のユーザーの行動記録を一括削除
+ * @param ids 記録IDリスト
  * @returns Promise
  */
 export function batchDeleteMyActions(ids: number[]): Promise<boolean> {
@@ -79,8 +79,8 @@ export function batchDeleteMyActions(ids: number[]): Promise<boolean> {
 }
 
 /**
- * 获取景点浏览数
- * @param itemId 景点ID
+ * 観光スポットの閲覧数を取得
+ * @param itemId 観光スポットID
  * @returns Promise
  */
 export function getItemViewCount(itemId: number): Promise<number> {
@@ -88,10 +88,10 @@ export function getItemViewCount(itemId: number): Promise<number> {
 }
 
 /**
- * 获取景点预约数
- * @param itemId 景点ID
+ * 観光スポットの予約数を取得
+ * @param itemId 観光スポットID
  * @returns Promise
  */
 export function getItemReservationCount(itemId: number): Promise<number> {
   return request.get(`/user-action/reservation/count/${itemId}`)
-} 
+}

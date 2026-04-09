@@ -7,15 +7,15 @@ def api_response(
     msg: str = "success"
 ) -> Response:
     """
-    统一的API响应格式
+    統一されたAPIレスポンス形式
     
     Args:
-        data: 响应数据
-        code: 状态码
-        msg: 提示信息
+        data: レスポンスデータ
+        code: ステータスコード
+        msg: メッセージ
     
     Returns:
-        包含统一格式的响应对象
+        統一形式のレスポンスオブジェクト
     """
     response = {
         'code': code,
@@ -27,21 +27,21 @@ def api_response(
         content_type='application/json; charset=utf-8'
     )
 
-def success(data=None, msg='操作成功'):
+def success(data=None, msg='操作に成功しました'):
     """
-    成功响应
-    :param data: 响应数据
-    :param msg: 提示信息
-    :return: JSON响应
+    成功レスポンス
+    :param data: レスポンスデータ
+    :param msg: メッセージ
+    :return: JSONレスポンス
     """
     return api_response(data=data, code=200, msg=msg)
 
-def error(msg='操作失败', code=500, data=None):
+def error(msg='操作に失敗しました', code=500, data=None):
     """
-    错误响应
-    :param msg: 错误信息
-    :param code: 错误码
-    :param data: 响应数据
-    :return: JSON响应
+    エラーレスポンス
+    :param msg: エラーメッセージ
+    :param code: エラーコード
+    :param data: レスポンスデータ
+    :return: JSONレスポンス
     """
     return api_response(data=data, code=code, msg=msg) 

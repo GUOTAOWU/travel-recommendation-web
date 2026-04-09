@@ -7,63 +7,63 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 物品视图对象
+ * アイテムビューオブジェクト
  */
 @Data
-@Schema(description = "物品视图对象")
+@Schema(description = "アイテムビューオブジェクト")
 public class ItemVO {
 
-    @Schema(description = "物品ID")
+    @Schema(description = "アイテムID")
     private Long id;
 
-    @Schema(description = "物品标题")
+    @Schema(description = "アイテムのタイトル")
     private String title;
 
-    @Schema(description = "物品描述")
+    @Schema(description = "アイテムの説明")
     private String description;
 
-    @Schema(description = "类别ID")
+    @Schema(description = "カテゴリID")
     private Long categoryId;
 
-    @Schema(description = "类别信息")
+    @Schema(description = "カテゴリ情報")
     private CategoryVO category;
 
-    @Schema(description = "用户ID（创建者）")
+    @Schema(description = "ユーザーID（作成者）")
     private Long userId;
 
-    @Schema(description = "发布者真实姓名")
+    @Schema(description = "投稿者の氏名")
     private String userRealName;
 
-    @Schema(description = "封面图片存储桶")
+    @Schema(description = "カバー画像のストレージバケット")
     private String coverBucket;
 
-    @Schema(description = "封面图片对象键")
+    @Schema(description = "カバー画像のオブジェクトキー")
     private String coverObjectKey;
 
-    @Schema(description = "封面图片URL")
+    @Schema(description = "カバー画像URL")
     private String coverUrl;
 
-    @Schema(description = "文件存储桶")
+    @Schema(description = "ファイルのストレージバケット")
     private String fileBucket;
 
-    @Schema(description = "文件对象键")
+    @Schema(description = "ファイルのオブジェクトキー")
     private String fileObjectKey;
 
-    @Schema(description = "文件URL")
+    @Schema(description = "ファイルURL")
     private String fileUrl;
 
-    @Schema(description = "标签，使用逗号分隔")
+    @Schema(description = "タグ（カンマ区切り文字列）")
     private String tags;
 
-    @Schema(description = "标签列表")
+    @Schema(description = "タグリスト（配列形式）")
     private String[] tagList;
 
-    @Schema(description = "额外数据，JSON格式，用于存储未来可能添加的字段")
+    @Schema(description = "拡張データ（JSON形式）。将来的なフィールド拡張用")
     private String extraData;
 
-    @Schema(description = "创建时间")
+    @Schema(description = "作成日時")
     private LocalDateTime createTime;
 
-    @Schema(description = "更新时间")
+    @Schema(description = "更新日時")
     private LocalDateTime updateTime;
-} 
+}

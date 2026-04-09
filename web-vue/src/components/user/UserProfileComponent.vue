@@ -1,4 +1,3 @@
-<!-- 用户画像组件 -->
 <template>
   <div class="user-profile-container">
     <div v-if="loading" class="loading-container">
@@ -7,51 +6,48 @@
     
     <template v-else>
       <div v-if="error" class="error-container">
-        <el-empty description="获取用户画像失败，请稍后再试">
-          <el-button type="primary" @click="loadUserProfile">重试</el-button>
+        <el-empty description="ユーザープロファイルの取得に失敗しました。後でもう一度お試しください">
+          <el-button type="primary" @click="loadUserProfile">再試行</el-button>
         </el-empty>
       </div>
       
       <div v-else-if="!profileData" class="empty-profile">
-        <el-empty description="暂无用户画像数据，需要多与系统交互来构建您的画像">
-          <el-button type="primary" @click="goToHome">去浏览景点</el-button>
+        <el-empty description="ユーザープロファイルデータがまだありません。システムを利用してプロファイルを構築してください">
+          <el-button type="primary" @click="goToHome">観光スポットを見る</el-button>
         </el-empty>
       </div>
       
       <div v-else class="profile-content">
-        <!-- 活跃度统计卡片 -->
         <el-card class="profile-card" shadow="hover">
           <template #header>
             <div class="card-header">
-              <h3>活跃度统计</h3>
+              <h3>アクティビティ統計</h3>
             </div>
           </template>
           
           <div class="activity-stats">
             <div class="chart-container">
-              <!-- 使用饼图展示活跃度 -->
               <el-progress 
                 v-for="(count, type) in profileData.activity_stats" 
                 :key="type" 
                 :percentage="getActivityPercentage(type)" 
                 :color="getColorForActivity(type)"
                 :stroke-width="18"
-                :format="(percentage) => `${getInteractionLabel(type)}: ${count}次`"
+                :format="(percentage) => `${getInteractionLabel(type)}: ${count}回`"
                 class="activity-progress"
               />
             </div>
             
             <div v-if="Object.keys(profileData.activity_stats).length === 0" class="no-data">
-              <span>暂无活跃数据</span>
+              <span>アクティビティデータがありません</span>
             </div>
           </div>
         </el-card>
         
-        <!-- 偏好类别卡片 -->
         <el-card class="profile-card" shadow="hover">
           <template #header>
             <div class="card-header">
-              <h3>偏好类别</h3>
+              <h3>お気に入りのカテゴリ</h3>
             </div>
           </template>
           
@@ -64,7 +60,7 @@
               <div class="category-info">
                 <span class="category-name">{{ category.name }}</span>
                 <el-tag type="success" size="small" effect="plain">
-                  {{ category.count }} 次交互
+                  {{ category.count }} 回のインタラクション
                 </el-tag>
               </div>
               
@@ -83,14 +79,13 @@
             </div>
           </div>
           
-          <el-empty v-else description="暂无类别偏好数据" />
+          <el-empty v-else description="カテゴリの好みに関するデータがありません" />
         </el-card>
         
-        <!-- 标签偏好卡片 -->
         <el-card class="profile-card" shadow="hover">
           <template #header>
             <div class="card-header">
-              <h3>标签偏好</h3>
+              <h3>タグの好み</h3>
             </div>
           </template>
           
@@ -107,14 +102,13 @@
             </el-tag>
           </div>
           
-          <el-empty v-else description="暂无标签偏好数据" />
+          <el-empty v-else description="タグの好みに関するデータがありません" />
         </el-card>
         
-        <!-- 相似用户卡片 -->
         <el-card class="profile-card" shadow="hover">
           <template #header>
             <div class="card-header">
-              <h3>相似兴趣的用户</h3>
+              <h3>興味が似ているユーザー</h3>
             </div>
           </template>
           
@@ -127,12 +121,12 @@
               <el-avatar :size="40" :src="getUserAvatar(user)"></el-avatar>
               <div class="user-info">
                 <span class="username">{{ user.username }}</span>
-                <span class="common-items">有 {{ user.commonItems }} 个共同兴趣景点</span>
+                <span class="common-items">{{ user.commonItems }} 件の共通の関心スポットがあります</span>
               </div>
             </div>
           </div>
           
-          <el-empty v-else description="暂无相似用户数据" />
+          <el-empty v-else description="似ているユーザーのデータがありません" />
         </el-card>
       </div>
     </template>
@@ -155,16 +149,16 @@ const loading = ref(true)
 const error = ref(false)
 const profileData = ref<UserProfile | null>(null)
 
-// 加载用户画像数据
+// ユーザープロファイルデータの読み込み
 const loadUserProfile = async () => {
   if (!userStore.isLoggedIn()) {
-    ElMessage.warning('请先登录')
+    ElMessage.warning('先にログインしてください')
     return
   }
   
   const userId = userStore.userInfo?.id
   if (!userId) {
-    ElMessage.warning('用户信息不完整')
+    ElMessage.warning('ユーザー情報が不完全です')
     return
   }
   
@@ -174,7 +168,7 @@ const loadUserProfile = async () => {
   try {
     const res = await getUserProfile(userId)
     
-    // 检查返回数据是否为空（没有交互记录）
+    // 返却されたデータが空（インタラクション記録なし）か確認
     const hasData = res.preferred_categories.length > 0 || 
                      res.preferred_tags.length > 0 || 
                      Object.keys(res.activity_stats).length > 0 ||
@@ -182,15 +176,15 @@ const loadUserProfile = async () => {
     
     profileData.value = hasData ? res : null
   } catch (err) {
-    console.error('获取用户画像失败:', err)
+    console.error('ユーザープロファイルの取得に失敗しました:', err)
     error.value = true
-    ElMessage.error('获取用户画像失败')
+    ElMessage.error('ユーザープロファイルの取得に失敗しました')
   } finally {
     loading.value = false
   }
 }
 
-// 获取活动百分比
+// アクティビティの割合を取得
 const getActivityPercentage = (type: string) => {
   if (!profileData.value?.activity_stats) return 0
   
@@ -201,7 +195,7 @@ const getActivityPercentage = (type: string) => {
   return Math.round((stats[type] / total) * 100)
 }
 
-// 获取活动颜色
+// アクティビティの色を取得
 const getColorForActivity = (type: string) => {
   const colorMap: Record<string, string> = {
     'VIEWED': '#409EFF',
@@ -224,52 +218,52 @@ const getColorForActivity = (type: string) => {
   return colorMap[type] || '#909399'
 }
 
-// 获取交互标签显示文本
+// インタラクションタグの表示テキストを取得
 const getInteractionLabel = (type: string) => {
   const labelMap: Record<string, string> = {
-    'VIEWED': '浏览',
-    'FAVORITED': '收藏',
-    'PURCHASED': '预约',
-    'LIKED': '点赞',
-    'CREATED': '发布',
-    'view': '浏览',
-    'favorite': '收藏',
-    'purchase': '预约',
-    'like': '点赞',
-    'created': '发布',
-    '浏览': '浏览',
-    '收藏': '收藏',
-    '预约': '预约',
-    '点赞': '点赞',
-    '发布': '发布'
+    'VIEWED': '閲覧',
+    'FAVORITED': 'お気に入り',
+    'PURCHASED': '予約',
+    'LIKED': 'いいね',
+    'CREATED': '投稿',
+    'view': '閲覧',
+    'favorite': 'お気に入り',
+    'purchase': '予約',
+    'like': 'いいね',
+    'created': '投稿',
+    '浏览': '閲覧',
+    '收藏': 'お気に入り',
+    '预约': '予約',
+    '点赞': 'いいね',
+    '发布': '投稿'
   }
   
   return labelMap[type] || type
 }
 
-// 根据计数获取标签大小
+// カウントに基づいてタグのサイズを取得
 const getTagSize = (count: number) => {
-  // 基础大小为12px，根据计数增加大小，最大20px
+  // 基本サイズは12px、カウントに応じてサイズを増やし、最大20px
   return Math.min(12 + Math.log2(count) * 2, 20)
 }
 
-// 获取用户头像 - 优先使用真实头像，没有则使用默认头像
+// ユーザーアバターを取得 - 本物のアバターを優先し、なければデフォルトのアバターを使用
 const getUserAvatar = (user: { userId: number, avatarBucket?: string, avatarObjectKey?: string }) => {
-  // 如果用户有头像信息，使用fileRequest获取URL
+  // ユーザーにアバター情報がある場合、fileRequestを使用してURLを取得
   if (user.avatarBucket && user.avatarObjectKey) {
     return fileRequest.getFileUrl(user.avatarBucket, user.avatarObjectKey)
   }
   
-  // 否则使用默认头像
+  // それ以外の場合はデフォルトのアバターを使用
   return getDefaultAvatar(user.userId)
 }
 
-// 获取默认头像
+// デフォルトのアバターを取得
 const getDefaultAvatar = (userId: number) => {
   return `https://randomuser.me/api/portraits/${userId % 2 === 0 ? 'men' : 'women'}/${userId % 70}.jpg`
 }
 
-// 去首页
+// ホームへ移動
 const goToHome = () => {
   router.push('/')
 }
@@ -424,10 +418,10 @@ onMounted(() => {
   font-size: 14px;
 }
 
-/* 响应式调整 */
+/* レスポンシブ対応 */
 @media (max-width: 768px) {
   .profile-content {
     grid-template-columns: 1fr;
   }
 }
-</style> 
+</style>

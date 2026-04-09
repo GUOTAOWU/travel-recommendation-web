@@ -7,42 +7,42 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * 更新物品DTO
+ * アイテム更新DTO
  */
 @Data
-@Schema(description = "更新物品DTO")
+@Schema(description = "アイテム更新DTO")
 public class ItemUpdateDTO {
 
-    @Schema(description = "物品ID", required = true)
-    @NotNull(message = "物品ID不能为空")
+    @Schema(description = "アイテムID", required = true)
+    @NotNull(message = "アイテムIDは必須です")
     private Long id;
 
-    @Schema(description = "物品标题")
-    @Size(max = 100, message = "物品标题长度不能超过100个字符")
+    @Schema(description = "アイテムのタイトル")
+    @Size(max = 100, message = "アイテムのタイトルは100文字以内で入力してください")
     private String title;
 
-    @Schema(description = "物品描述")
+    @Schema(description = "アイテムの説明")
     private String description;
 
-    @Schema(description = "类别ID")
+    @Schema(description = "カテゴリID")
     private Long categoryId;
 
-    @Schema(description = "封面图片存储桶")
+    @Schema(description = "カバー画像のバケット名")
     private String coverBucket;
 
-    @Schema(description = "封面图片对象键")
+    @Schema(description = "カバー画像のオブジェクトキー")
     private String coverObjectKey;
 
-    @Schema(description = "文件存储桶")
+    @Schema(description = "ファイルのバケット名")
     private String fileBucket;
 
-    @Schema(description = "文件对象键")
+    @Schema(description = "ファイルのオブジェクトキー")
     private String fileObjectKey;
 
-    @Schema(description = "标签，使用逗号分隔")
-    @Size(max = 255, message = "标签长度不能超过255个字符")
+    @Schema(description = "タグ（カンマ区切り）")
+    @Size(max = 255, message = "タグは255文字以内で入力してください")
     private String tags;
 
-    @Schema(description = "额外数据，JSON格式，用于存储未来可能添加的字段")
+    @Schema(description = "追加データ。JSON形式。将来的に追加される可能性のあるフィールドの保存に使用")
     private String extraData;
-} 
+}

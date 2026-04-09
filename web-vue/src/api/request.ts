@@ -3,21 +3,21 @@ import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig, Axi
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
-// 创建 axios 实例
+// axios インスタンスの作成
 const instance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  timeout: 10000,
+  timeout: 10000000,
 })
 
-// 请求拦截器
+// リクエストインターセプター
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 从 localStorage 获取 token
+    // localStorage からトークンを取得
     const userInfo = localStorage.getItem('userInfo')
     if (userInfo) {
       const { token } = JSON.parse(userInfo)
       if (token && config.headers) {
-        // 添加 token 到请求头
+        // リクエストヘッダーにトークンを追加
         config.headers.Authorization = `Bearer ${token}`
       }
     }
@@ -28,62 +28,62 @@ instance.interceptors.request.use(
   }
 )
 
-// 响应拦截器
+// レスポンスインターセプター
 instance.interceptors.response.use(
   (response: AxiosResponse) => {
 
-    // 如果是二进制数据，直接返回
+    // バイナリデータの場合は、そのまま返す
     if (response.config.responseType === 'blob') {
       return response.data
     }
 
     const { code, msg, data } = response.data
 
-    // 请求成功
+    // リクエスト成功
     if (code === 200 || code === 0) {
       return data
     }
 
-    // 登录过期
+    // ログイン有効期限切れ
     if (code === 401) {
       const userStore = useUserStore()
-      // 不向后端发送请求，只清除本地状态
+      // バックエンドにリクエストを送信せず、ローカル状態のみをクリアする
       userStore.logout(false)
-      return Promise.reject(new Error('登录已过期，请重新登录'))
+      return Promise.reject(new Error('ログインの有効期限が切れました。再度ログインしてください'))
     }
 
-    // 显示错误信息
-    const error = new Error(msg || '请求失败') as Error & { response?: any }
+    // エラーメッセージを表示
+    const error = new Error(msg || 'リクエストに失敗しました') as Error & { response?: any }
     error.response = response
-    ElMessage.error(msg || '请求失败')
+    ElMessage.error(msg || 'リクエストに失敗しました')
     return Promise.reject(error)
   },
   (error) => {
-    // 处理网络错误
-    let message = '网络请求失败，请检查网络连接'
+    // ネットワークエラーの処理
+    let message = 'ネットワークリクエストに失敗しました。ネットワーク接続を確認してください'
     if (error.response) {
       const { status, data } = error.response
       switch (status) {
         case 400:
-          message = data.msg || '请求参数错误'
+          message = data.msg || 'リクエストパラメータエラー'
           break
         case 401:
-          message = '登录已过期，请重新登录'
+          message = 'ログインの有効期限が切れました。再度ログインしてください'
           const userStore = useUserStore()
-          // 不向后端发送请求，只清除本地状态
+          // バックエンドにリクエストを送信せず、ローカル状態のみをクリアする
           userStore.logout(false)
           break
         case 403:
-          message = '没有权限访问该资源'
+          message = 'このリソースにアクセスする権限がありません'
           break
         case 404:
-          message = '请求的资源不存在'
+          message = 'リクエストされたリソースは存在しません'
           break
         case 500:
-          message = '服务器内部错误'
+          message = 'サーバー内部エラー'
           break
         default:
-          message = data.msg || '请求失败'
+          message = data.msg || 'リクエストに失敗しました'
       }
     }
     if (!error.config?.silent) {
@@ -93,7 +93,7 @@ instance.interceptors.response.use(
   }
 )
 
-// 封装请求方法
+// リクエストメソッドのラップ
 const request = {
   get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
     return instance.get(url, config)
@@ -113,4 +113,3 @@ const request = {
 }
 
 export { request }
- 

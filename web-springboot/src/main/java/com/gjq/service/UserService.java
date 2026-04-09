@@ -7,70 +7,70 @@ import com.gjq.vo.user.*;
 import com.gjq.entity.User;
 
 /**
- * 用户服务接口
+ * ユーザーサービスインターフェース
  */
 public interface UserService extends IService<User> {
     /**
-     * 用户登录
+     * ユーザーログイン
      *
-     * @param dto 登录参数
-     * @return 登录用户信息
+     * @param dto ログインパラメータ
+     * @return ログインユーザー情報
      */
     UserLoginVO login(UserLoginDTO dto);
 
     /**
-     * 用户注册
+     * ユーザー登録
      *
-     * @param dto 注册参数
+     * @param dto 登録パラメータ
      */
     void register(UserRegisterDTO dto);
 
     /**
-     * 修改密码
+     * パスワード変更
      *
-     * @param dto 修改密码参数
+     * @param dto パスワード変更パラメータ
      */
     void updatePassword(UserPasswordDTO dto);
 
     /**
-     * 更新用户信息
+     * ユーザー情報の更新
      *
-     * @param dto 用户信息
+     * @param dto ユーザー情報
      */
     void updateUser(UserUpdateDTO dto);
 
     /**
-     * 分页查询用户列表
+     * ユーザーリストのページング検索
      *
-     * @param dto 查询参数
-     * @return 用户列表
+     * @param dto 検索パラメータ
+     * @return ユーザーリスト
      */
     IPage<User> getUserPage(UserQueryDTO dto);
 
     /**
-     * 获取当前登录用户信息
+     * 現在のログインユーザー情報を取得
      *
-     * @return 用户信息
+     * @return ユーザー情報
      */
     UserLoginVO getCurrentUser();
 
     /**
-     * 退出登录
+     * ログアウト
      */
     void logout();
 
     /**
-     * 新增用户
+     * ユーザーの新規追加（管理者用など）
      */
     void addUser(UserAddDTO dto);
 
     /**
-     * 重置密码
+     * パスワードのリセット
      */
     void resetPassword(Long id);
 
     /**
-     * 更新用户状态
+     * ユーザーステータスの更新（有効/無効など）
      */
     void updateStatus(Long id, Integer status);
-} 
+}

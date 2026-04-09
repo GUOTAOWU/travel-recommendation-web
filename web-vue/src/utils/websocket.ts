@@ -1,11 +1,11 @@
 export interface WebSocketMessage {
   type: 'fire_detected' | 'camera_status' | 'frame' | 'start_stream' | 'stop_stream' | 'check_camera' | 'stream_stopped'
   data: {
-    wsId?: string      // 添加 wsId 字段
+    wsId?: string      // WebSocket ID
     cameraId: number
-    rtspUrl?: string   // RTSP地址
-    frame?: string     // base64编码的图片
-    status?: number    // 摄像头状态
+    rtspUrl?: string   // RTSPアドレス
+    frame?: string     // base64エンコードされた画像フレーム
+    status?: number    // カメラのステータス
     has_fire?: boolean
     has_smoke?: boolean
     fire_confidence?: number
@@ -18,7 +18,7 @@ export interface WebSocketMessage {
   }
 }
 
-// WebSocket服务器URL
+// WebSocketサーバーのURL設定
 const WS_URL = import.meta.env.VITE_ALGO_WS_URL || `ws://${window.location.hostname}:5000/ws`
 
 class WebSocketClient {
@@ -30,46 +30,46 @@ class WebSocketClient {
   private messageHandlers: ((message: WebSocketMessage) => void)[] = []
   private isActiveClose = false
   private reconnectTimer: number | null = null
-  private messageQueue: any[] = []  // 消息队列
-  private isConnecting = false  // 连接状态标记
+  private messageQueue: any[] = []  // メッセージキュー
+  private isConnecting = false      // 接続中フラグ
 
   constructor(url: string) {
     this.url = url
     console.log('WebSocket URL:', url)
   }
 
-  // 连接WebSocket
+  // WebSocketに接続
   connect() {
-    // 如果已经连接，不要重复连接
+    // すでに接続済みの場合は何もしない
     if (this.ws?.readyState === WebSocket.OPEN) {
-      console.log('WebSocket已经连接')
-      this.processMessageQueue()  // 处理可能存在的消息队列
+      console.log('WebSocketはすでに接続されています')
+      this.processMessageQueue()  // 待機中のキューを処理
       return
     }
 
-    // 如果正在连接，等待连接完成
+    // 接続処理中の場合は待機
     if (this.ws?.readyState === WebSocket.CONNECTING || this.isConnecting) {
-      console.log('WebSocket正在连接中')
+      console.log('WebSocket接続処理中です...')
       return
     }
 
-    // 如果存在旧的连接，先清理
+    // 既存の古い接続があればクリーンアップ
     this.cleanup()
 
-    // 重置状态
+    // 状態をリセット
     this.isActiveClose = false
     this.isConnecting = true
-    console.log('正在连接WebSocket:', this.url)
+    console.log('WebSocketに接続を試みています:', this.url)
 
     try {
       this.ws = new WebSocket(this.url)
 
       this.ws.onopen = () => {
-        console.log('WebSocket连接成功')
+        console.log('WebSocket接続に成功しました')
         this.reconnectAttempts = 0
         this.clearReconnectTimer()
         this.isConnecting = false
-        this.processMessageQueue()  // 连接成功后处理消息队列
+        this.processMessageQueue()  // 接続成功後にキュー内のメッセージを送信
       }
 
       this.ws.onmessage = (event) => {
@@ -77,12 +77,12 @@ class WebSocketClient {
           const message: WebSocketMessage = JSON.parse(event.data)
           this.messageHandlers.forEach(handler => handler(message))
         } catch (error) {
-          console.error('WebSocket消息解析失败:', error)
+          console.error('WebSocketメッセージの解析に失敗しました:', error)
         }
       }
 
       this.ws.onclose = (event) => {
-        console.log('WebSocket连接关闭:', {
+        console.log('WebSocket接続が閉じられました:', {
           code: event.code,
           reason: event.reason,
           wasClean: event.wasClean,
@@ -91,32 +91,31 @@ class WebSocketClient {
 
         this.isConnecting = false
 
-        // 只有在非主动关闭且不是正常关闭的情况下才重连
+        // 明示的なクローズでなく、正常終了でもない場合に再接続をスケジュール
         if (!this.isActiveClose && !event.wasClean) {
           this.scheduleReconnect()
         } else {
-          console.log('WebSocket正常关闭，不进行重连')
+          console.log('WebSocketが正常に終了したため、再接続は行いません')
           this.cleanup()
         }
       }
 
       this.ws.onerror = (event) => {
         this.isConnecting = false
-        // 只在开发环境下打印详细错误
+        // 開発環境のみ詳細なエラーを出力
         if (import.meta.env.DEV) {
-          console.error('WebSocket错误:', event)
+          console.error('WebSocketエラー:', event)
         }
-        // 生产环境下打印简化的错误信息
-        console.error('WebSocket连接出错')
+        console.error('WebSocket接続でエラーが発生しました')
       }
     } catch (error) {
       this.isConnecting = false
-      console.error('创建WebSocket连接失败:', error)
+      console.error('WebSocket接続の作成に失敗しました:', error)
       this.scheduleReconnect()
     }
   }
 
-  // 处理消息队列
+  // メッセージキューの処理
   private processMessageQueue() {
     while (this.messageQueue.length > 0) {
       const message = this.messageQueue.shift()
@@ -124,25 +123,24 @@ class WebSocketClient {
     }
   }
 
-  // 立即发送消息
+  // メッセージを即時送信
   private sendImmediate(message: any) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.error('WebSocket未连接，消息发送失败')
+      console.error('WebSocketが接続されていないため、メッセージの送信に失敗しました')
       return
     }
 
     try {
       this.ws.send(JSON.stringify(message))
     } catch (error) {
-      console.error('发送消息失败:', error)
+      console.error('メッセージの送信に失敗しました:', error)
     }
   }
 
-  // 发送消息
+  // メッセージ送信（未接続時はキューに保存）
   send(message: any) {
-    // 如果WebSocket未连接，先连接
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.log('WebSocket未连接，将消息加入队列并尝试连接')
+      console.log('WebSocket未接続のため、メッセージをキューに追加し、接続を試みます')
       this.messageQueue.push(message)
       this.connect()
       return
@@ -151,21 +149,21 @@ class WebSocketClient {
     this.sendImmediate(message)
   }
 
-  // 清理资源
+  // リソースのクリーンアップ
   private cleanup() {
     if (this.ws) {
-      // 移除所有事件监听器
+      // 全てのイベントリスナーを解除
       this.ws.onopen = null
       this.ws.onclose = null
       this.ws.onmessage = null
       this.ws.onerror = null
 
-      // 如果连接还在打开状态，尝试正常关闭
+      // 接続が開いている場合は正常に閉じる
       if (this.ws.readyState === WebSocket.OPEN) {
         try {
           this.ws.close(1000, 'Normal closure')
         } catch (error) {
-          console.error('关闭WebSocket连接失败:', error)
+          console.error('WebSocket接続のクローズに失敗しました:', error)
         }
       }
 
@@ -175,7 +173,7 @@ class WebSocketClient {
     this.clearReconnectTimer()
   }
 
-  // 清除重连定时器
+  // 再接続タイマーのクリア
   private clearReconnectTimer() {
     if (this.reconnectTimer) {
       window.clearTimeout(this.reconnectTimer)
@@ -183,30 +181,30 @@ class WebSocketClient {
     }
   }
 
-  // 安排重连
+  // 再接続のスケジュール
   private scheduleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('WebSocket重连次数超过最大限制')
+      console.error('WebSocketの再接続試行回数が上限に達しました')
       this.cleanup()
       return
     }
 
     this.reconnectAttempts++
-    console.log('WebSocket计划第' + this.reconnectAttempts + '次重连')
+    console.log(`WebSocket: ${this.reconnectAttempts}回目の再接続をスケジュールしています`)
 
     this.clearReconnectTimer()
     this.reconnectTimer = window.setTimeout(() => {
-      console.log('执行重连...')
+      console.log('再接続を実行中...')
       this.connect()
     }, this.reconnectTimeout)
   }
 
-  // 添加消息处理器
+  // メッセージハンドラーの追加
   addMessageHandler(handler: (message: WebSocketMessage) => void) {
     this.messageHandlers.push(handler)
   }
 
-  // 移除消息处理器
+  // メッセージハンドラーの削除
   removeMessageHandler(handler: (message: WebSocketMessage) => void) {
     const index = this.messageHandlers.indexOf(handler)
     if (index !== -1) {
@@ -214,20 +212,20 @@ class WebSocketClient {
     }
   }
 
-  // 关闭连接
+  // 接続を閉じる
   close() {
-    console.log('主动关闭WebSocket连接')
+    console.log('WebSocket接続を能動的に閉じます')
     this.isActiveClose = true
     this.cleanup()
   }
 
-  // 检查WebSocket是否已连接
+  // 接続状態の確認
   isConnected(): boolean {
     return this.ws !== null && this.ws.readyState === WebSocket.OPEN
   }
 }
 
-// 创建WebSocket客户端实例
+// WebSocketクライアントのインスタンスを作成
 const wsClient = new WebSocketClient(WS_URL)
 
-export default wsClient 
+export default wsClient
